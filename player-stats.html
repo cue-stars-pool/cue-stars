@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Player Stats - Stapleford Cue Stars Pool Team</title>
+<style>
+  :root{
+    --felt: #0f4d3a;
+    --felt-dark: #0a3a2b;
+    --rail: #4a2c1d;
+    --rail-dark: #331f14;
+    --ivory: #f3ede0;
+    --gold: #c9a227;
+    --line: rgba(243,237,224,0.16);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(255,255,255,0.04), transparent 40%),
+      var(--felt);
+    background-image:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px),
+      var(--felt);
+    font-family: 'Segoe UI', -apple-system, system-ui, sans-serif;
+    color: var(--ivory);
+    padding-bottom: 60px;
+  }
+  .rail{
+    background: linear-gradient(180deg, var(--rail) 0%, var(--rail-dark) 100%);
+    border-bottom: 4.5px solid var(--gold);
+    padding: 24px 15px 20px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+  }
+  .rail-inner{ max-width: 720px; margin: 0 auto; }
+  .back-link{
+    color: var(--gold);
+    font-size: 12px;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+  h1{
+    font-family: 'Oswald', 'Arial Narrow', sans-serif;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: clamp(19px, 4vw, 30px);
+    margin: 4px 0 0;
+    color: var(--ivory);
+    text-shadow: 0 2px 0 rgba(0,0,0,0.3);
+  }
+
+  main{
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 15px 0;
+  }
+
+  .filters{
+    display:flex;
+    gap: 12px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .filter-field{ flex: 1; min-width: 130px; }
+  .filter-field label{
+    display:block;
+    color: var(--gold);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+  }
+  .filter-field select{
+    width: 100%;
+    background: var(--ivory);
+    color: #1c1b19;
+    border: 1px solid var(--line);
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  .filter-field select:focus{ outline:none; border-color: var(--gold); }
+  .filter-field input{
+    width: 100%;
+    background: var(--ivory);
+    color: #1c1b19;
+    border: 1px solid var(--line);
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  .filter-field input:focus{ outline:none; border-color: var(--gold); }
+
+  .status-line{
+    font-size: 11px;
+    color: rgba(243,237,224,0.6);
+    margin-bottom: 12px;
+    letter-spacing: 0.3px;
+  }
+
+  .filter-note{
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gold);
+    background: rgba(201,162,39,0.1);
+    border: 1px solid rgba(201,162,39,0.3);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+  }
+
+  .stats-table-wrap{
+    background: rgba(0,0,0,0.18);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  table{
+    width: 100%;
+    border-collapse: collapse;
+  }
+  thead th{
+    text-align: left;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--gold);
+    font-weight: 700;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line);
+    background: rgba(0,0,0,0.15);
+  }
+  thead th.num{ text-align: center; }
+  tbody td{
+    padding: 11px 14px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--line);
+    color: var(--ivory);
+  }
+  tbody tr:last-child td{ border-bottom: none; }
+  td.num{ text-align: center; }
+  td.name{ font-weight: 600; }
+  td.success{ font-weight: 700; color: var(--gold); }
+
+  .empty-state{
+    padding: 40px 24px;
+    text-align: center;
+    color: rgba(243,237,224,0.6);
+  }
+  .empty-state .tri{ font-size: 30px; margin-bottom: 8px; }
+  .empty-state p{ margin: 4px 0; font-size: 13px; }
+
+  .hidden{ display:none !important; }
+</style>
+</head>
+<body>
+
+<div class="rail">
+  <div class="rail-inner">
+    <a class="back-link" href="index.html">&larr; Home</a>
+    <h1>Player Stats 📊</h1>
+  </div>
+</div>
+
+<main>
+  <div class="filters">
+    <div class="filter-field">
+      <label for="seasonFilter">Season</label>
+      <select id="seasonFilter">
+        <option value="all">All Seasons</option>
+      </select>
+    </div>
+    <div class="filter-field">
+      <label for="legFilter">Leg</label>
+      <select id="legFilter">
+        <option value="all">All Legs</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+      </select>
+    </div>
+    <div class="filter-field">
+      <label for="homeFilter">Home Team</label>
+      <select id="homeFilter">
+        <option value="all">All</option>
+      </select>
+    </div>
+    <div class="filter-field">
+      <label for="awayFilter">Away Team</label>
+      <select id="awayFilter">
+        <option value="all">All</option>
+      </select>
+    </div>
+    <div class="filter-field">
+      <label for="activeFilter">Active Player</label>
+      <select id="activeFilter">
+        <option value="yes">Yes</option>
+        <option value="no">No</option>
+      </select>
+    </div>
+    <div class="filter-field">
+      <label for="gamesPlayedFilter">Games Played (min)</label>
+      <input type="number" id="gamesPlayedFilter" value="1" min="1" max="999">
+    </div>
+  </div>
+
+  <div class="filter-note">Adjust the filters above to narrow the results shown below.</div>
+
+  <div class="status-line" id="statusText">Loading results…</div>
+
+  <div class="stats-table-wrap hidden" id="tableWrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Player Name</th>
+          <th class="num">Games Played</th>
+          <th class="num">Games Won</th>
+          <th class="num">Success</th>
+        </tr>
+      </thead>
+      <tbody id="statsBody"></tbody>
+    </table>
+  </div>
+
+  <div class="empty-state hidden" id="emptyState">
+    <div class="tri">▲</div>
+    <p><strong>No results match these filters.</strong></p>
+    <p>Try a different leg, home team, or away team.</p>
+  </div>
+</main>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAiIaXtQRBvDGFllrzmjYbx_Br1mR65Ox8",
+    authDomain: "stapleford-cue-stars.firebaseapp.com",
+    projectId: "stapleford-cue-stars",
+    storageBucket: "stapleford-cue-stars.firebasestorage.app",
+    messagingSenderId: "488893378210",
+    appId: "1:488893378210:web:9f81ed4b389443081031fb"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  const legFilter = document.getElementById('legFilter');
+  const homeFilter = document.getElementById('homeFilter');
+  const awayFilter = document.getElementById('awayFilter');
+  const seasonFilter = document.getElementById('seasonFilter');
+  const activeFilter = document.getElementById('activeFilter');
+  const statusText = document.getElementById('statusText');
+  const tableWrap = document.getElementById('tableWrap');
+  const statsBody = document.getElementById('statsBody');
+  const emptyState = document.getElementById('emptyState');
+  const gamesPlayedFilter = document.getElementById('gamesPlayedFilter');
+
+  let allResults = [];
+  let currentPlayerNames = new Set();
+
+  function computeAndRender(){
+    const leg = legFilter.value;
+    const home = homeFilter.value;
+    const away = awayFilter.value;
+    const season = seasonFilter.value;
+
+    const filtered = allResults.filter(r => {
+      if(leg !== 'all' && String(r.leg) !== leg) return false;
+      if(home !== 'all' && r.homeTeam !== home) return false;
+      if(away !== 'all' && r.awayTeam !== away) return false;
+      if(season !== 'all' && r.season !== season) return false;
+      const isCurrentPlayer = currentPlayerNames.has(r.playerName);
+      if(activeFilter.value === 'yes' && !isCurrentPlayer) return false;
+      if(activeFilter.value === 'no' && isCurrentPlayer) return false;
+      return true;
+    });
+
+    const byPlayer = {};
+    filtered.forEach(r => {
+      if(!byPlayer[r.playerName]){
+        byPlayer[r.playerName] = { played: 0, won: 0 };
+      }
+      byPlayer[r.playerName].played += 1;
+      if(r.result === 'Win'){ byPlayer[r.playerName].won += 1; }
+    });
+
+    const rows = Object.keys(byPlayer).sort((a, b) => a.localeCompare(b)).map(name => {
+      const stat = byPlayer[name];
+      const success = stat.played > 0 ? Math.round((stat.won / stat.played) * 100) : 0;
+      return { name, played: stat.played, won: stat.won, success };
+    }).sort((a, b) => b.success - a.success || a.name.localeCompare(b.name));
+
+    const minGames = Number(gamesPlayedFilter.value);
+    const displayRows = Number.isFinite(minGames) && minGames > 0
+      ? rows.filter(r => r.played >= minGames)
+      : rows;
+
+    statusText.textContent = `${filtered.length} result${filtered.length === 1 ? '' : 's'} · ${rows.length} player${rows.length === 1 ? '' : 's'}`;
+
+    if(displayRows.length === 0){
+      tableWrap.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+    } else {
+      emptyState.classList.add('hidden');
+      tableWrap.classList.remove('hidden');
+      statsBody.innerHTML = displayRows.map(r => `
+        <tr>
+          <td class="name">${r.name}</td>
+          <td class="num">${r.played}</td>
+          <td class="num">${r.won}</td>
+          <td class="num success">${r.success}%</td>
+        </tr>
+      `).join('');
+    }
+  }
+
+  db.collection('results').onSnapshot((snapshot) => {
+    allResults = snapshot.docs.map(doc => doc.data());
+    computeAndRender();
+  }, () => {
+    statusText.textContent = 'Could not load results.';
+  });
+
+  db.collection('players').onSnapshot((snapshot) => {
+    currentPlayerNames = new Set(snapshot.docs.map(doc => doc.data().name));
+    computeAndRender();
+  });
+
+  db.collection('seasons').orderBy('name', 'asc').onSnapshot((snapshot) => {
+    const prevValue = seasonFilter.value;
+    seasonFilter.innerHTML = '<option value="all">All Seasons</option>' + snapshot.docs.map(doc =>
+      `<option value="${doc.data().name}">${doc.data().name}</option>`
+    ).join('');
+    if(prevValue){ seasonFilter.value = prevValue; }
+    computeAndRender();
+  });
+
+  db.collection('venues').orderBy('name', 'asc').onSnapshot((snapshot) => {
+    const prevHome = homeFilter.value;
+    const prevAway = awayFilter.value;
+    const options = '<option value="all">All</option>' + snapshot.docs.map(doc =>
+      `<option value="${doc.data().name}">${doc.data().name}</option>`
+    ).join('');
+    homeFilter.innerHTML = options;
+    awayFilter.innerHTML = options;
+    if(prevHome){ homeFilter.value = prevHome; }
+    if(prevAway){ awayFilter.value = prevAway; }
+    computeAndRender();
+  });
+
+  legFilter.addEventListener('change', computeAndRender);
+  homeFilter.addEventListener('change', computeAndRender);
+  awayFilter.addEventListener('change', computeAndRender);
+  seasonFilter.addEventListener('change', computeAndRender);
+  activeFilter.addEventListener('change', computeAndRender);
+  gamesPlayedFilter.addEventListener('input', computeAndRender);
+</script>
+</body>
+</html>

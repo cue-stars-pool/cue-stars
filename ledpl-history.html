@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Long Eaton &amp; District Pool League — Results History</title>
+<style>
+  :root{
+    --bg:#0f1720; --panel:#17222c; --panel2:#1d2b38; --line:#2a3947;
+    --text:#e9eef2; --muted:#93a4b3; --accent:#4fb3ff; --win:#37c871; --loss:#ff6161; --draw:#e0b93d;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg); color:var(--text);
+  }
+  header{
+    padding:28px 20px 18px; text-align:center; border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#132330,#0f1720);
+  }
+  header h1{ margin:0 0 6px; font-size:1.5rem; letter-spacing:.2px;}
+  header p{ margin:0; color:var(--muted); font-size:.92rem; }
+  .wrap{ max-width:980px; margin:0 auto; padding:18px 16px 60px; }
+  .controls{
+    display:flex; flex-wrap:wrap; gap:10px; margin:18px 0 20px; position:sticky; top:0;
+    background:var(--bg); padding:12px 0; z-index:5; border-bottom:1px solid var(--line);
+  }
+  select{
+    background:var(--panel2); color:var(--text); border:1px solid var(--line); border-radius:8px;
+    padding:9px 12px; font-size:.95rem; flex:1; min-width:150px;
+  }
+  .note{
+    background:#22303c; border:1px solid var(--line); border-left:4px solid var(--accent);
+    border-radius:6px; padding:12px 14px; font-size:.85rem; color:var(--muted); margin-bottom:18px; line-height:1.5;
+  }
+  .note b{ color:var(--text); }
+  .team-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:12px; margin-bottom:18px; overflow:hidden;
+  }
+  .team-head{
+    display:flex; justify-content:space-between; align-items:center; padding:14px 16px;
+    background:var(--panel2); border-bottom:1px solid var(--line);
+  }
+  .team-head h2{ margin:0; font-size:1.05rem; }
+  .team-head .div-tag{ font-size:.72rem; color:var(--muted); background:#0f1720; padding:3px 8px; border-radius:20px; border:1px solid var(--line); }
+  table{ width:100%; border-collapse:collapse; font-size:.88rem; }
+  th{ text-align:left; color:var(--muted); font-weight:600; padding:8px 12px; border-bottom:1px solid var(--line); font-size:.75rem; text-transform:uppercase; letter-spacing:.4px; }
+  td{ padding:9px 12px; border-bottom:1px solid #202f3a; vertical-align:middle; }
+  tr:last-child td{ border-bottom:none; }
+  .res{ display:inline-block; width:20px; height:20px; line-height:20px; text-align:center; border-radius:5px; font-weight:700; font-size:.72rem; color:#0f1720; }
+  .res.W{ background:var(--win); } .res.L{ background:var(--loss); } .res.D{ background:var(--draw); }
+  .score{ font-weight:700; font-variant-numeric:tabular-nums; }
+  .comp{ font-size:.7rem; padding:2px 7px; border-radius:20px; border:1px solid var(--line); color:var(--muted); }
+  .comp.C{ color:#f0c96a; border-color:#4a3c1c; }
+  .opp{ color:var(--text); }
+  .date{ color:var(--muted); white-space:nowrap; }
+  .hidden{ display:none !important; }
+  footer{ text-align:center; color:var(--muted); font-size:.78rem; padding:20px; }
+  a{ color:var(--accent); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Long Eaton &amp; District Pool League</h1>
+  <p>Results history — Summer 2026 season · All 4 divisions, 40 teams</p>
+</header>
+
+<div class="wrap">
+
+  <div class="note">
+    <b>Coverage note:</b> Each team page on the official site (leaguerepublic.com) only publishes its
+    <b>most recent 12 results</b> — the full season archive is blocked to automated access. So results here run
+    from roughly <b>23 April 2026</b> through <b>23 July 2026</b> per team (not all the way back to the
+    5&nbsp;March season start). Source: <a href="https://ledpl.leaguerepublic.com/index.html" target="_blank" rel="noopener">ledpl.leaguerepublic.com</a>.
+  </div>
+
+  <div class="controls">
+    <select id="divFilter"></select>
+    <select id="teamFilter"></select>
+  </div>
+
+  <div id="results"></div>
+</div>
+
+<footer>Built from official LEDPL team pages · Last site update shown: 28/07/26 17:22</footer>
+
+<script>
+const DATA = {
+"Division 1": {
+  "Curzon PH": [
+    ["23/07/26","Davy Lamp","Curzon PH","3-6","L"],
+    ["16/07/26","Curzon PH","West End GHQ","7-2","L"],
+    ["09/07/26","Curzon B","Curzon PH","2-5","C"],
+    ["02/07/26","Cue Club A","Curzon PH","4-5","L"],
+    ["25/06/26","Curzon PH","Cue Stars","6-3","L"],
+    ["18/06/26","Barganauts","Curzon PH","1-8","L"],
+    ["11/06/26","Curzon PH","Soldiers","5-2","C"],
+    ["04/06/26","Curzon PH","Zingari Nomads","7-2","L"],
+    ["28/05/26","Tappers Finest","Curzon PH","1-8","L"],
+    ["21/05/26","Bell Inn Sawley","Curzon PH","0-9","L"],
+    ["14/05/26","Cue Club A","Curzon PH","1-5","C"],
+    ["07/05/26","Curzon PH","Tappers Finest","6-3","L"]
+  ],
+  "Cue Club A": [
+    ["23/07/26","Cue Club A","Zingari Nomads","6-3","L"],
+    ["16/07/26","Tappers Finest","Cue Club A","1-8","L"],
+    ["02/07/26","Cue Club A","Curzon PH","4-5","L"],
+    ["25/06/26","Soldiers","Cue Club A","5-4","L"],
+    ["18/06/26","Cue Club A","Davy Lamp","4-5","L"],
+    ["04/06/26","West End GHQ","Cue Club A","3-6","L"],
+    ["28/05/26","Cue Club A","Bell Inn Sawley","8-1","L"],
+    ["21/05/26","Cue Stars","Cue Club A","3-6","L"],
+    ["14/05/26","Cue Club A","Curzon PH","1-5","C"],
+    ["07/05/26","Bell Inn Sawley","Cue Club A","2-7","L"],
+    ["30/04/26","Cue Club A","West End GHQ","8-1","L"],
+    ["23/04/26","Davy Lamp","Cue Club A","5-4","L"]
+  ],
+  "Soldiers": [
+    ["23/07/26","Soldiers","Bell Inn Sawley","5-4","L"],
+    ["16/07/26","Soldiers","Davy Lamp","5-0","L"],
+    ["02/07/26","West End GHQ","Soldiers","6-3","L"],
+    ["25/06/26","Soldiers","Cue Club A","5-4","L"],
+    ["18/06/26","Cue Stars","Soldiers","4-5","L"],
+    ["11/06/26","Curzon PH","Soldiers","5-2","C"],
+    ["04/06/26","Soldiers","Barganauts","6-3","L"],
+    ["28/05/26","Zingari Nomads","Soldiers","6-3","L"],
+    ["21/05/26","Tappers Finest","Soldiers","3-6","L"],
+    ["14/05/26","Soldiers","West End WHF","5-2","C"],
+    ["07/05/26","Soldiers","Zingari Nomads","5-4","L"],
+    ["30/04/26","Barganauts","Soldiers","3-6","L"]
+  ],
+  "West End GHQ": [
+    ["23/07/26","West End GHQ","Tappers Finest","7-2","L"],
+    ["16/07/26","Curzon PH","West End GHQ","7-2","L"],
+    ["09/07/26","Tappers Finest","West End GHQ","2-5","C"],
+    ["02/07/26","West End GHQ","Soldiers","6-3","L"],
+    ["25/06/26","Davy Lamp","West End GHQ","5-4","L"],
+    ["18/06/26","West End GHQ","Bell Inn Sawley","7-2","L"],
+    ["11/06/26","West End GHQ","Festival","5-0","C"],
+    ["04/06/26","West End GHQ","Cue Club A","3-6","L"],
+    ["28/05/26","Cue Stars","West End GHQ","4-5","L"],
+    ["21/05/26","Barganauts","West End GHQ","3-6","L"],
+    ["14/05/26","West End GHQ","Cue Club C","5-2","C"],
+    ["07/05/26","West End GHQ","Cue Stars","5-4","L"]
+  ],
+  "Davy Lamp": [
+    ["23/07/26","Davy Lamp","Curzon PH","3-6","L"],
+    ["16/07/26","Soldiers","Davy Lamp","5-0","L"],
+    ["02/07/26","Davy Lamp","Bell Inn Sawley","8-1","L"],
+    ["25/06/26","Davy Lamp","West End GHQ","5-4","L"],
+    ["18/06/26","Cue Club A","Davy Lamp","4-5","L"],
+    ["11/06/26","Curzon B","Davy Lamp","5-3","C"],
+    ["04/06/26","Davy Lamp","Cue Stars","4-5","L"],
+    ["28/05/26","Barganauts","Davy Lamp","3-6","L"],
+    ["21/05/26","Zingari Nomads","Davy Lamp","7-2","L"],
+    ["14/05/26","Davy Lamp","Zingari Nomads","5-0","C"],
+    ["07/05/26","Davy Lamp","Barganauts","6-3","L"],
+    ["30/04/26","Cue Stars","Davy Lamp","4-5","L"]
+  ],
+  "Tappers Finest": [
+    ["23/07/26","West End GHQ","Tappers Finest","7-2","L"],
+    ["16/07/26","Tappers Finest","Cue Club A","1-8","L"],
+    ["09/07/26","Tappers Finest","West End GHQ","2-5","C"],
+    ["02/07/26","Cue Stars","Tappers Finest","4-5","L"],
+    ["25/06/26","Tappers Finest","Barganauts","7-2","L"],
+    ["18/06/26","Zingari Nomads","Tappers Finest","4-5","L"],
+    ["11/06/26","The Bridge MP","Tappers Finest","0-5","C"],
+    ["04/06/26","Bell Inn Sawley","Tappers Finest","3-6","L"],
+    ["28/05/26","Tappers Finest","Curzon PH","1-8","L"],
+    ["21/05/26","Tappers Finest","Soldiers","3-6","L"],
+    ["14/05/26","Tappers Finest","Cue Club B","5-4","C"],
+    ["07/05/26","Curzon PH","Tappers Finest","6-3","L"]
+  ],
+  "Cue Stars": [
+    ["23/07/26","Cue Stars","Barganauts","8-1","L"],
+    ["16/07/26","Zingari Nomads","Cue Stars","2-7","L"],
+    ["09/07/26","Midland B","Cue Stars","0-5","C"],
+    ["02/07/26","Cue Stars","Tappers Finest","4-5","L"],
+    ["25/06/26","Curzon PH","Cue Stars","6-3","L"],
+    ["18/06/26","Cue Stars","Soldiers","4-5","L"],
+    ["11/06/26","Cue Stars","Midland A","5-2","C"],
+    ["04/06/26","Davy Lamp","Cue Stars","4-5","L"],
+    ["28/05/26","Cue Stars","West End GHQ","4-5","L"],
+    ["21/05/26","Cue Stars","Cue Club A","3-6","L"],
+    ["14/05/26","Curzon C","Cue Stars","3-5","C"],
+    ["07/05/26","West End GHQ","Cue Stars","5-4","L"]
+  ],
+  "Bell Inn Sawley": [
+    ["23/07/26","Soldiers","Bell Inn Sawley","5-4","L"],
+    ["16/07/26","Bell Inn Sawley","Barganauts","7-2","L"],
+    ["09/07/26","Bell Inn Sawley","Coach & Horses","5-3","C"],
+    ["02/07/26","Davy Lamp","Bell Inn Sawley","8-1","L"],
+    ["25/06/26","Bell Inn Sawley","Zingari Nomads","3-6","L"],
+    ["18/06/26","West End GHQ","Bell Inn Sawley","7-2","L"],
+    ["11/06/26","Bell Inn Sawley","White Lion Sandiacre","5-0","C"],
+    ["04/06/26","Bell Inn Sawley","Tappers Finest","3-6","L"],
+    ["28/05/26","Cue Club A","Bell Inn Sawley","8-1","L"],
+    ["21/05/26","Bell Inn Sawley","Curzon PH","0-9","L"],
+    ["14/05/26","Old Cross","Bell Inn Sawley","0-5","C"],
+    ["07/05/26","Bell Inn Sawley","Cue Club A","2-7","L"]
+  ],
+  "Zingari Nomads": [
+    ["23/07/26","Cue Club A","Zingari Nomads","6-3","L"],
+    ["16/07/26","Zingari Nomads","Cue Stars","2-7","L"],
+    ["02/07/26","Barganauts","Zingari Nomads","5-4","L"],
+    ["25/06/26","Bell Inn Sawley","Zingari Nomads","3-6","L"],
+    ["18/06/26","Zingari Nomads","Tappers Finest","4-5","L"],
+    ["04/06/26","Curzon PH","Zingari Nomads","7-2","L"],
+    ["28/05/26","Zingari Nomads","Soldiers","6-3","L"],
+    ["21/05/26","Zingari Nomads","Davy Lamp","7-2","L"],
+    ["14/05/26","Davy Lamp","Zingari Nomads","5-0","C"],
+    ["07/05/26","Soldiers","Zingari Nomads","5-4","L"],
+    ["30/04/26","Zingari Nomads","Curzon PH","4-5","L"],
+    ["23/04/26","Tappers Finest","Zingari Nomads","5-4","L"]
+  ],
+  "Barganauts": [
+    ["23/07/26","Cue Stars","Barganauts","8-1","L"],
+    ["16/07/26","Bell Inn Sawley","Barganauts","7-2","L"],
+    ["02/07/26","Barganauts","Zingari Nomads","5-4","L"],
+    ["25/06/26","Tappers Finest","Barganauts","7-2","L"],
+    ["18/06/26","Barganauts","Curzon PH","1-8","L"],
+    ["04/06/26","Soldiers","Barganauts","6-3","L"],
+    ["28/05/26","Barganauts","Davy Lamp","3-6","L"],
+    ["21/05/26","Barganauts","West End GHQ","3-6","L"],
+    ["14/05/26","Barganauts","Curzon B","4-5","C"],
+    ["07/05/26","Davy Lamp","Barganauts","6-3","L"],
+    ["30/04/26","Barganauts","Soldiers","3-6","L"],
+    ["23/04/26","Curzon PH","Barganauts","7-2","L"]
+  ]
+},
+"Division 2": {
+  "Festival": [
+    ["23/07/26","Festival","West End WHF","6-3","L"],
+    ["16/07/26","Old Mill","Festival","3-6","L"],
+    ["02/07/26","Festival","Barging Inn","5-4","L"],
+    ["25/06/26","Midland A","Festival","3-6","L"],
+    ["18/06/26","Festival","Cue Club B","6-3","L"],
+    ["11/06/26","West End GHQ","Festival","5-0","C"],
+    ["04/06/26","Festival","Bell Sawley B","6-3","L"],
+    ["28/05/26","Curzon B","Festival","5-4","L"],
+    ["21/05/26","Moorlands A","Festival","4-5","L"],
+    ["07/05/26","Festival","Curzon B","6-3","L"],
+    ["30/04/26","Bell Sawley B","Festival","7-2","L"],
+    ["23/04/26","Cue Club B","Festival","6-3","L"]
+  ],
+  "Moorlands A": [
+    ["23/07/26","Curzon B","Moorlands A","3-6","L"],
+    ["16/07/26","Cue Club B","Moorlands A","4-5","L"],
+    ["02/07/26","Moorlands A","Plough","6-3","L"],
+    ["25/06/26","West End WHF","Moorlands A","5-4","L"],
+    ["18/06/26","Moorlands A","Old Mill","8-1","L"],
+    ["11/06/26","Tappers B","Moorlands A","5-4","C"],
+    ["04/06/26","Barging Inn","Moorlands A","5-4","L"],
+    ["28/05/26","Moorlands A","Midland A","5-4","L"],
+    ["21/05/26","Moorlands A","Festival","4-5","L"],
+    ["14/05/26","Moorlands A","Barging Inn","5-1","C"],
+    ["07/05/26","Midland A","Moorlands A","4-5","L"],
+    ["30/04/26","Moorlands A","Barging Inn","6-3","L"]
+  ],
+  "West End WHF": [
+    ["23/07/26","Festival","West End WHF","6-3","L"],
+    ["16/07/26","West End WHF","Bell Sawley B","5-4","L"],
+    ["02/07/26","Curzon B","West End WHF","4-5","L"],
+    ["25/06/26","West End WHF","Moorlands A","5-4","L"],
+    ["18/06/26","Plough","West End WHF","8-1","L"],
+    ["04/06/26","Cue Club B","West End WHF","3-6","L"],
+    ["28/05/26","West End WHF","Old Mill","6-3","L"],
+    ["21/05/26","West End WHF","Barging Inn","6-3","L"],
+    ["14/05/26","Soldiers","West End WHF","5-2","C"],
+    ["07/05/26","Old Mill","West End WHF","4-5","L"],
+    ["30/04/26","West End WHF","Cue Club B","4-5","L"],
+    ["23/04/26","West End WHF","Plough","5-4","L"]
+  ],
+  "Cue Club B": [
+    ["23/07/26","Barging Inn","Cue Club B","4-5","L"],
+    ["16/07/26","Cue Club B","Moorlands A","4-5","L"],
+    ["02/07/26","Midland A","Cue Club B","4-5","L"],
+    ["25/06/26","Cue Club B","Plough","5-4","L"],
+    ["18/06/26","Festival","Cue Club B","6-3","L"],
+    ["04/06/26","Cue Club B","West End WHF","3-6","L"],
+    ["28/05/26","Bell Sawley B","Cue Club B","3-6","L"],
+    ["21/05/26","Cue Club B","Old Mill","6-3","L"],
+    ["14/05/26","Tappers Finest","Cue Club B","5-4","C"],
+    ["07/05/26","Cue Club B","Bell Sawley B","7-2","L"],
+    ["30/04/26","West End WHF","Cue Club B","4-5","L"],
+    ["23/04/26","Cue Club B","Festival","6-3","L"]
+  ],
+  "Plough": [
+    ["23/07/26","Bell Sawley B","Plough","6-3","L"],
+    ["16/07/26","Plough","Curzon B","7-2","L"],
+    ["09/07/26","Plough","Tappers B","5-4","C"],
+    ["02/07/26","Moorlands A","Plough","6-3","L"],
+    ["25/06/26","Cue Club B","Plough","5-4","L"],
+    ["18/06/26","Plough","West End WHF","8-1","L"],
+    ["11/06/26","Stumble Inn","Plough","3-6","C"],
+    ["04/06/26","Old Mill","Plough","3-6","L"],
+    ["28/05/26","Plough","Barging Inn","6-3","L"],
+    ["21/05/26","Plough","Midland A","3-6","L"],
+    ["07/05/26","Barging Inn","Plough","3-6","L"],
+    ["30/04/26","Plough","Old Mill","6-3","L"]
+  ],
+  "Midland A": [
+    ["23/07/26","Midland A","Old Mill","4-5","L"],
+    ["16/07/26","Barging Inn","Midland A","3-6","L"],
+    ["02/07/26","Midland A","Cue Club B","4-5","L"],
+    ["25/06/26","Midland A","Festival","3-6","L"],
+    ["18/06/26","Bell Sawley B","Midland A","5-4","L"],
+    ["11/06/26","Cue Stars","Midland A","5-2","C"],
+    ["04/06/26","Midland A","Curzon B","3-6","L"],
+    ["28/05/26","Moorlands A","Midland A","5-4","L"],
+    ["21/05/26","Plough","Midland A","3-6","L"],
+    ["14/05/26","Midland A","Corner Pin","5-1","C"],
+    ["07/05/26","Midland A","Moorlands A","4-5","L"],
+    ["30/04/26","Curzon B","Midland A","1-8","L"]
+  ],
+  "Bell Sawley B": [
+    ["23/07/26","Bell Sawley B","Plough","6-3","L"],
+    ["16/07/26","West End WHF","Bell Sawley B","5-4","L"],
+    ["02/07/26","Bell Sawley B","Old Mill","6-3","L"],
+    ["25/06/26","Barging Inn","Bell Sawley B","5-4","L"],
+    ["18/06/26","Bell Sawley B","Midland A","5-4","L"],
+    ["11/06/26","Midland B","Bell Sawley B","5-4","C"],
+    ["04/06/26","Festival","Bell Sawley B","6-3","L"],
+    ["28/05/26","Bell Sawley B","Cue Club B","3-6","L"],
+    ["21/05/26","Curzon B","Bell Sawley B","3-6","L"],
+    ["14/05/26","Bell Sawley B","Zingari A","5-4","C"],
+    ["07/05/26","Cue Club B","Bell Sawley B","7-2","L"],
+    ["30/04/26","Bell Sawley B","Festival","7-2","L"]
+  ],
+  "Curzon B": [
+    ["23/07/26","Curzon B","Moorlands A","3-6","L"],
+    ["16/07/26","Plough","Curzon B","7-2","L"],
+    ["09/07/26","Curzon B","Curzon PH","2-5","C"],
+    ["02/07/26","Curzon B","West End WHF","4-5","L"],
+    ["25/06/26","Old Mill","Curzon B","5-4","L"],
+    ["18/06/26","Curzon B","Barging Inn","5-4","L"],
+    ["11/06/26","Curzon B","Davy Lamp","5-3","C"],
+    ["04/06/26","Midland A","Curzon B","3-6","L"],
+    ["28/05/26","Curzon B","Festival","5-4","L"],
+    ["21/05/26","Curzon B","Bell Sawley B","3-6","L"],
+    ["14/05/26","Barganauts","Curzon B","4-5","C"],
+    ["07/05/26","Festival","Curzon B","6-3","L"]
+  ],
+  "Old Mill": [
+    ["23/07/26","Midland A","Old Mill","4-5","L"],
+    ["16/07/26","Old Mill","Festival","3-6","L"],
+    ["02/07/26","Bell Sawley B","Old Mill","6-3","L"],
+    ["25/06/26","Old Mill","Curzon B","5-4","L"],
+    ["18/06/26","Moorlands A","Old Mill","8-1","L"],
+    ["11/06/26","Coach & Horses","Old Mill","5-2","C"],
+    ["04/06/26","Old Mill","Plough","3-6","L"],
+    ["28/05/26","West End WHF","Old Mill","6-3","L"],
+    ["21/05/26","Cue Club B","Old Mill","6-3","L"],
+    ["07/05/26","Old Mill","West End WHF","4-5","L"],
+    ["30/04/26","Plough","Old Mill","6-3","L"],
+    ["23/04/26","Old Mill","Moorlands A","5-4","L"]
+  ],
+  "Barging Inn": [
+    ["23/07/26","Barging Inn","Cue Club B","4-5","L"],
+    ["16/07/26","Barging Inn","Midland A","3-6","L"],
+    ["02/07/26","Festival","Barging Inn","5-4","L"],
+    ["25/06/26","Barging Inn","Bell Sawley B","5-4","L"],
+    ["18/06/26","Curzon B","Barging Inn","5-4","L"],
+    ["04/06/26","Barging Inn","Moorlands A","5-4","L"],
+    ["28/05/26","Plough","Barging Inn","6-3","L"],
+    ["21/05/26","West End WHF","Barging Inn","6-3","L"],
+    ["14/05/26","Moorlands A","Barging Inn","5-1","C"],
+    ["07/05/26","Barging Inn","Plough","3-6","L"],
+    ["30/04/26","Moorlands A","Barging Inn","6-3","L"],
+    ["23/04/26","Barging Inn","Curzon B","3-6","L"]
+  ]
+},
+"Division 3": {
+  "Curzon A": [
+    ["23/07/26","Curzon A","Sawley Soldiers","6-3","L"],
+    ["16/07/26","Midland B","Curzon A","4-5","L"],
+    ["09/07/26","Curzon A","Chequers Breaston","5-3","C"],
+    ["02/07/26","Curzon A","Chequers Breaston","6-3","L"],
+    ["25/06/26","Cue Club C","Curzon A","3-6","L"],
+    ["18/06/26","Curzon A","Moorlands B","7-2","L"],
+    ["11/06/26","Moorlands B","Curzon A","4-5","C"],
+    ["04/06/26","Coach & Horses","Curzon A","6-3","L"],
+    ["28/05/26","Curzon A","Tappers B","7-2","L"],
+    ["21/05/26","Curzon A","Stumble Inn","7-2","L"],
+    ["14/05/26","Curzon A","Railway Sawley","5-0","C"],
+    ["07/05/26","Tappers B","Curzon A","4-5","L"]
+  ],
+  "Coach & Horses": [
+    ["23/07/26","Coach & Horses","Cue Club C","6-3","L"],
+    ["16/07/26","Moorlands B","Coach & Horses","0-9","L"],
+    ["09/07/26","Bell Inn Sawley","Coach & Horses","5-3","C"],
+    ["02/07/26","Coach & Horses","Stumble Out","3-6","L"],
+    ["25/06/26","Coach & Horses","Tappers B","5-0","L"],
+    ["18/06/26","Stumble Inn","Coach & Horses","2-7","L"],
+    ["11/06/26","Coach & Horses","Old Mill","5-2","C"],
+    ["04/06/26","Coach & Horses","Curzon A","6-3","L"],
+    ["28/05/26","Sawley Soldiers","Coach & Horses","6-3","L"],
+    ["21/05/26","Midland B","Coach & Horses","5-4","L"],
+    ["14/05/26","Bass House","Coach & Horses","1-5","C"],
+    ["07/05/26","Coach & Horses","Sawley Soldiers","4-5","L"]
+  ],
+  "Stumble Out": [
+    ["23/07/26","Moorlands B","Stumble Out","1-8","L"],
+    ["16/07/26","Stumble Out","Sawley Soldiers","6-3","L"],
+    ["02/07/26","Coach & Horses","Stumble Out","3-6","L"],
+    ["25/06/26","Stumble Out","Midland B","7-2","L"],
+    ["18/06/26","Tappers B","Stumble Out","3-6","L"],
+    ["04/06/26","Stumble Out","Chequers Breaston","4-5","L"],
+    ["28/05/26","Stumble Inn","Stumble Out","4-5","L"],
+    ["21/05/26","Stumble Out","Cue Club C","4-5","L"],
+    ["14/05/26","Stumble Out","Moorlands B","3-5","C"],
+    ["07/05/26","Stumble Out","Stumble Inn","6-3","L"],
+    ["30/04/26","Chequers Breaston","Stumble Out","5-4","L"],
+    ["23/04/26","Stumble Out","Tappers B","6-3","L"]
+  ],
+  "Sawley Soldiers": [
+    ["23/07/26","Curzon A","Sawley Soldiers","6-3","L"],
+    ["16/07/26","Stumble Out","Sawley Soldiers","6-3","L"],
+    ["02/07/26","Sawley Soldiers","Midland B","5-0","L"],
+    ["25/06/26","Chequers Breaston","Sawley Soldiers","5-4","L"],
+    ["18/06/26","Sawley Soldiers","Cue Club C","7-2","L"],
+    ["11/06/26","Sawley Soldiers","Chequers Breaston","1-5","C"],
+    ["04/06/26","Moorlands B","Sawley Soldiers","4-5","L"],
+    ["28/05/26","Sawley Soldiers","Coach & Horses","6-3","L"],
+    ["21/05/26","Sawley Soldiers","Tappers B","4-5","L"],
+    ["14/05/26","Larry's Bar","Sawley Soldiers","1-5","C"],
+    ["07/05/26","Coach & Horses","Sawley Soldiers","4-5","L"],
+    ["30/04/26","Sawley Soldiers","Moorlands B","5-4","L"]
+  ],
+  "Chequers Breaston": [
+    ["23/07/26","Tappers B","Chequers Breaston","2-7","L"],
+    ["16/07/26","Chequers Breaston","Stumble Inn","4-5","L"],
+    ["09/07/26","Curzon A","Chequers Breaston","5-3","C"],
+    ["02/07/26","Curzon A","Chequers Breaston","6-3","L"],
+    ["25/06/26","Chequers Breaston","Sawley Soldiers","5-4","L"],
+    ["18/06/26","Midland B","Chequers Breaston","3-6","L"],
+    ["11/06/26","Sawley Soldiers","Chequers Breaston","1-5","C"],
+    ["04/06/26","Stumble Out","Chequers Breaston","4-5","L"],
+    ["28/05/26","Chequers Breaston","Cue Club C","6-3","L"],
+    ["21/05/26","Chequers Breaston","Moorlands B","3-6","L"],
+    ["14/05/26","Chequers Breaston","Man of Iron","5-1","C"],
+    ["07/05/26","Cue Club C","Chequers Breaston","3-6","L"]
+  ],
+  "Stumble Inn": [
+    ["23/07/26","Stumble Inn","Midland B","4-5","L"],
+    ["16/07/26","Chequers Breaston","Stumble Inn","4-5","L"],
+    ["02/07/26","Stumble Inn","Cue Club C","5-4","L"],
+    ["25/06/26","Moorlands B","Stumble Inn","4-5","L"],
+    ["18/06/26","Stumble Inn","Coach & Horses","2-7","L"],
+    ["11/06/26","Stumble Inn","Plough","3-6","C"],
+    ["04/06/26","Tappers B","Stumble Inn","3-6","L"],
+    ["28/05/26","Stumble Inn","Stumble Out","4-5","L"],
+    ["21/05/26","Curzon A","Stumble Inn","7-2","L"],
+    ["07/05/26","Stumble Out","Stumble Inn","6-3","L"],
+    ["30/04/26","Stumble Inn","Tappers B","5-4","L"],
+    ["23/04/26","Coach & Horses","Stumble Inn","5-4","L"]
+  ],
+  "Moorlands B": [
+    ["23/07/26","Moorlands B","Stumble Out","1-8","L"],
+    ["16/07/26","Moorlands B","Coach & Horses","0-9","L"],
+    ["02/07/26","Tappers B","Moorlands B","3-6","L"],
+    ["25/06/26","Moorlands B","Stumble Inn","4-5","L"],
+    ["18/06/26","Curzon A","Moorlands B","7-2","L"],
+    ["11/06/26","Moorlands B","Curzon A","4-5","C"],
+    ["04/06/26","Moorlands B","Sawley Soldiers","4-5","L"],
+    ["28/05/26","Midland B","Moorlands B","5-4","L"],
+    ["21/05/26","Chequers Breaston","Moorlands B","3-6","L"],
+    ["14/05/26","Stumble Out","Moorlands B","3-5","C"],
+    ["07/05/26","Moorlands B","Midland B","7-2","L"],
+    ["30/04/26","Sawley Soldiers","Moorlands B","5-4","L"]
+  ],
+  "Midland B": [
+    ["23/07/26","Stumble Inn","Midland B","4-5","L"],
+    ["16/07/26","Midland B","Curzon A","4-5","L"],
+    ["09/07/26","Midland B","Cue Stars","0-5","C"],
+    ["02/07/26","Sawley Soldiers","Midland B","5-0","L"],
+    ["25/06/26","Stumble Out","Midland B","7-2","L"],
+    ["18/06/26","Midland B","Chequers Breaston","3-6","L"],
+    ["11/06/26","Midland B","Bell Sawley B","5-4","C"],
+    ["04/06/26","Cue Club C","Midland B","4-5","L"],
+    ["28/05/26","Midland B","Moorlands B","5-4","L"],
+    ["21/05/26","Midland B","Coach & Horses","5-4","L"],
+    ["07/05/26","Moorlands B","Midland B","7-2","L"],
+    ["30/04/26","Midland B","Cue Club C","4-5","L"]
+  ],
+  "Cue Club C": [
+    ["23/07/26","Coach & Horses","Cue Club C","6-3","L"],
+    ["16/07/26","Cue Club C","Tappers B","4-4","D"],
+    ["02/07/26","Stumble Inn","Cue Club C","5-4","L"],
+    ["25/06/26","Cue Club C","Curzon A","3-6","L"],
+    ["18/06/26","Sawley Soldiers","Cue Club C","7-2","L"],
+    ["04/06/26","Cue Club C","Midland B","4-5","L"],
+    ["28/05/26","Chequers Breaston","Cue Club C","6-3","L"],
+    ["21/05/26","Stumble Out","Cue Club C","4-5","L"],
+    ["14/05/26","West End GHQ","Cue Club C","5-2","C"],
+    ["07/05/26","Cue Club C","Chequers Breaston","3-6","L"],
+    ["30/04/26","Midland B","Cue Club C","4-5","L"],
+    ["23/04/26","Cue Club C","Sawley Soldiers","3-6","L"]
+  ],
+  "Tappers B": [
+    ["23/07/26","Tappers B","Chequers Breaston","2-7","L"],
+    ["16/07/26","Cue Club C","Tappers B","4-4","D"],
+    ["09/07/26","Plough","Tappers B","5-4","C"],
+    ["02/07/26","Tappers B","Moorlands B","3-6","L"],
+    ["25/06/26","Coach & Horses","Tappers B","5-0","L"],
+    ["18/06/26","Tappers B","Stumble Out","3-6","L"],
+    ["11/06/26","Tappers B","Moorlands A","5-4","C"],
+    ["04/06/26","Tappers B","Stumble Inn","3-6","L"],
+    ["28/05/26","Curzon A","Tappers B","7-2","L"],
+    ["21/05/26","Sawley Soldiers","Tappers B","4-5","L"],
+    ["07/05/26","Tappers B","Curzon A","4-5","L"],
+    ["30/04/26","Stumble Inn","Tappers B","5-4","L"]
+  ]
+},
+"Division 4": {
+  "Railway Sawley": [
+    ["23/07/26","Railway Sawley","Bass House","5-0","L"],
+    ["16/07/26","Railway Sawley","Zingari A","6-3","L"],
+    ["02/07/26","Larry's Bar","Railway Sawley","2-7","L"],
+    ["25/06/26","Railway Sawley","Old Cross","5-4","L"],
+    ["18/06/26","White Lion Sandiacre","Railway Sawley","1-8","L"],
+    ["04/06/26","Railway Sawley","The Bridge MP","5-4","L"],
+    ["28/05/26","Man of Iron","Railway Sawley","4-5","L"],
+    ["21/05/26","Corner Pin","Railway Sawley","4-5","L"],
+    ["14/05/26","Curzon A","Railway Sawley","5-0","C"],
+    ["07/05/26","Railway Sawley","Man of Iron","3-6","L"],
+    ["30/04/26","The Bridge MP","Railway Sawley","3-6","L"],
+    ["23/04/26","Railway Sawley","White Lion Sandiacre","4-5","L"]
+  ],
+  "Zingari A": [
+    ["23/07/26","Zingari A","Curzon C","6-3","L"],
+    ["16/07/26","Railway Sawley","Zingari A","6-3","L"],
+    ["02/07/26","Zingari A","Bass House","6-3","L"],
+    ["25/06/26","Zingari A","Larry's Bar","6-3","L"],
+    ["18/06/26","Old Cross","Zingari A","5-4","L"],
+    ["04/06/26","Zingari A","White Lion Sandiacre","7-2","L"],
+    ["28/05/26","The Bridge MP","Zingari A","5-4","L"],
+    ["21/05/26","Man of Iron","Zingari A","4-5","L"],
+    ["14/05/26","Bell Sawley B","Zingari A","5-4","C"],
+    ["07/05/26","Zingari A","The Bridge MP","8-1","L"],
+    ["30/04/26","White Lion Sandiacre","Zingari A","2-7","L"],
+    ["23/04/26","Zingari A","Old Cross","4-5","L"]
+  ],
+  "Old Cross": [
+    ["23/07/26","Old Cross","Man of Iron","4-5","L"],
+    ["16/07/26","Corner Pin","Old Cross","2-7","L"],
+    ["02/07/26","Old Cross","Curzon C","7-2","L"],
+    ["25/06/26","Railway Sawley","Old Cross","5-4","L"],
+    ["18/06/26","Old Cross","Zingari A","5-4","L"],
+    ["04/06/26","Larry's Bar","Old Cross","4-5","L"],
+    ["28/05/26","Old Cross","Bass House","7-2","L"],
+    ["21/05/26","White Lion Sandiacre","Old Cross","3-6","L"],
+    ["14/05/26","Old Cross","Bell Inn Sawley","0-5","C"],
+    ["07/05/26","Bass House","Old Cross","2-7","L"],
+    ["30/04/26","Old Cross","Larry's Bar","7-2","L"],
+    ["23/04/26","Zingari A","Old Cross","4-5","L"]
+  ],
+  "Man of Iron": [
+    ["23/07/26","Old Cross","Man of Iron","4-5","L"],
+    ["16/07/26","Man of Iron","White Lion Sandiacre","5-4","L"],
+    ["02/07/26","The Bridge MP","Man of Iron","5-0","L"],
+    ["25/06/26","Bass House","Man of Iron","3-6","L"],
+    ["18/06/26","Man of Iron","Corner Pin","5-4","L"],
+    ["04/06/26","Curzon C","Man of Iron","6-3","L"],
+    ["28/05/26","Man of Iron","Railway Sawley","4-5","L"],
+    ["21/05/26","Man of Iron","Zingari A","4-5","L"],
+    ["14/05/26","Chequers Breaston","Man of Iron","5-1","C"],
+    ["07/05/26","Railway Sawley","Man of Iron","3-6","L"],
+    ["30/04/26","Man of Iron","Curzon C","5-4","L"],
+    ["23/04/26","Corner Pin","Man of Iron","3-6","L"]
+  ],
+  "Curzon C": [
+    ["23/07/26","Zingari A","Curzon C","6-3","L"],
+    ["16/07/26","Curzon C","Larry's Bar","5-4","L"],
+    ["02/07/26","Old Cross","Curzon C","7-2","L"],
+    ["25/06/26","Curzon C","White Lion Sandiacre","5-0","L"],
+    ["18/06/26","The Bridge MP","Curzon C","3-6","L"],
+    ["04/06/26","Curzon C","Man of Iron","6-3","L"],
+    ["28/05/26","Corner Pin","Curzon C","3-6","L"],
+    ["21/05/26","Bass House","Curzon C","5-4","L"],
+    ["14/05/26","Curzon C","Cue Stars","3-5","C"],
+    ["07/05/26","Curzon C","Corner Pin","7-2","L"],
+    ["30/04/26","Man of Iron","Curzon C","5-4","L"],
+    ["23/04/26","Curzon C","The Bridge MP","5-4","L"]
+  ],
+  "The Bridge MP": [
+    ["23/07/26","White Lion Sandiacre","The Bridge MP","5-4","L"],
+    ["16/07/26","Bass House","The Bridge MP","3-6","L"],
+    ["02/07/26","The Bridge MP","Man of Iron","5-0","L"],
+    ["25/06/26","Corner Pin","The Bridge MP","6-3","L"],
+    ["18/06/26","The Bridge MP","Curzon C","3-6","L"],
+    ["11/06/26","The Bridge MP","Tappers Finest","0-5","C"],
+    ["04/06/26","Railway Sawley","The Bridge MP","5-4","L"],
+    ["28/05/26","The Bridge MP","Zingari A","5-4","L"],
+    ["21/05/26","The Bridge MP","Larry's Bar","4-5","L"],
+    ["07/05/26","Zingari A","The Bridge MP","8-1","L"],
+    ["30/04/26","The Bridge MP","Railway Sawley","3-6","L"],
+    ["23/04/26","Curzon C","The Bridge MP","5-4","L"]
+  ],
+  "Larry's Bar": [
+    ["23/07/26","Larry's Bar","Corner Pin","7-2","L"],
+    ["16/07/26","Curzon C","Larry's Bar","5-4","L"],
+    ["02/07/26","Larry's Bar","Railway Sawley","2-7","L"],
+    ["25/06/26","Zingari A","Larry's Bar","6-3","L"],
+    ["18/06/26","Larry's Bar","Bass House","2-7","L"],
+    ["04/06/26","Larry's Bar","Old Cross","4-5","L"],
+    ["28/05/26","White Lion Sandiacre","Larry's Bar","3-6","L"],
+    ["21/05/26","The Bridge MP","Larry's Bar","4-5","L"],
+    ["14/05/26","Larry's Bar","Sawley Soldiers","1-5","C"],
+    ["07/05/26","Larry's Bar","White Lion Sandiacre","6-3","L"],
+    ["30/04/26","Old Cross","Larry's Bar","7-2","L"],
+    ["23/04/26","Bass House","Larry's Bar","4-5","L"]
+  ],
+  "White Lion Sandiacre": [
+    ["23/07/26","White Lion Sandiacre","The Bridge MP","5-4","L"],
+    ["16/07/26","Man of Iron","White Lion Sandiacre","5-4","L"],
+    ["02/07/26","White Lion Sandiacre","Corner Pin","4-5","L"],
+    ["25/06/26","Curzon C","White Lion Sandiacre","5-0","L"],
+    ["18/06/26","White Lion Sandiacre","Railway Sawley","1-8","L"],
+    ["11/06/26","Bell Inn Sawley","White Lion Sandiacre","5-0","C"],
+    ["04/06/26","Zingari A","White Lion Sandiacre","7-2","L"],
+    ["28/05/26","White Lion Sandiacre","Larry's Bar","3-6","L"],
+    ["21/05/26","White Lion Sandiacre","Old Cross","3-6","L"],
+    ["07/05/26","Larry's Bar","White Lion Sandiacre","6-3","L"],
+    ["30/04/26","White Lion Sandiacre","Zingari A","2-7","L"],
+    ["23/04/26","Railway Sawley","White Lion Sandiacre","4-5","L"]
+  ],
+  "Bass House": [
+    ["23/07/26","Railway Sawley","Bass House","5-0","L"],
+    ["16/07/26","Bass House","The Bridge MP","3-6","L"],
+    ["02/07/26","Zingari A","Bass House","6-3","L"],
+    ["25/06/26","Bass House","Man of Iron","3-6","L"],
+    ["18/06/26","Larry's Bar","Bass House","2-7","L"],
+    ["04/06/26","Bass House","Corner Pin","5-4","L"],
+    ["28/05/26","Old Cross","Bass House","7-2","L"],
+    ["21/05/26","Bass House","Curzon C","5-4","L"],
+    ["14/05/26","Bass House","Coach & Horses","1-5","C"],
+    ["07/05/26","Bass House","Old Cross","2-7","L"],
+    ["30/04/26","Corner Pin","Bass House","3-6","L"],
+    ["23/04/26","Bass House","Larry's Bar","4-5","L"]
+  ],
+  "Corner Pin": [
+    ["23/07/26","Larry's Bar","Corner Pin","7-2","L"],
+    ["16/07/26","Corner Pin","Old Cross","2-7","L"],
+    ["02/07/26","White Lion Sandiacre","Corner Pin","4-5","L"],
+    ["25/06/26","Corner Pin","The Bridge MP","6-3","L"],
+    ["18/06/26","Man of Iron","Corner Pin","5-4","L"],
+    ["04/06/26","Bass House","Corner Pin","5-4","L"],
+    ["28/05/26","Corner Pin","Curzon C","3-6","L"],
+    ["21/05/26","Corner Pin","Railway Sawley","4-5","L"],
+    ["14/05/26","Midland A","Corner Pin","5-1","C"],
+    ["07/05/26","Curzon C","Corner Pin","7-2","L"],
+    ["30/04/26","Corner Pin","Bass House","3-6","L"],
+    ["23/04/26","Corner Pin","Man of Iron","3-6","L"]
+  ]
+}
+};
+
+// ---- build UI ----
+const divSel = document.getElementById('divFilter');
+const teamSel = document.getElementById('teamFilter');
+const resultsDiv = document.getElementById('results');
+
+const divisions = Object.keys(DATA);
+divSel.innerHTML = '<option value="All">All Divisions</option>' +
+  divisions.map(d=>`<option value="${d}">${d}</option>`).join('');
+
+function teamsForDivision(div){
+  if(div==='All'){
+    let all=[];
+    divisions.forEach(d=> all.push(...Object.keys(DATA[d]).map(t=>({t,d}))));
+    return all;
+  }
+  return Object.keys(DATA[div]).map(t=>({t,d:div}));
+}
+
+function populateTeamSelect(){
+  const div = divSel.value;
+  const teams = teamsForDivision(div).sort((a,b)=>a.t.localeCompare(b.t));
+  teamSel.innerHTML = '<option value="All">All Teams</option>' +
+    teams.map(o=>`<option value="${o.d}||${o.t}">${o.t}${div==='All'?' ('+o.d+')':''}</option>`).join('');
+}
+
+function resultBadge(team, home, away, score){
+  const [hs,as] = score.split('-').map(Number);
+  const isHome = team===home;
+  const my = isHome? hs: as;
+  const opp = isHome? as: hs;
+  if(my>opp) return 'W';
+  if(my<opp) return 'L';
+  return 'D';
+}
+
+function render(){
+  const divVal = divSel.value;
+  const teamVal = teamSel.value;
+  resultsDiv.innerHTML='';
+
+  let entries = [];
+  if(teamVal==='All'){
+    teamsForDivision(divVal).forEach(({t,d})=> entries.push({team:t, div:d}));
+  } else {
+    const [d,t] = teamVal.split('||');
+    entries.push({team:t, div:d});
+  }
+  entries.sort((a,b)=> a.team.localeCompare(b.team));
+
+  entries.forEach(({team,div})=>{
+    const rows = DATA[div][team];
+    const card = document.createElement('div');
+    card.className='team-card';
+    const wins = rows.filter(r=>resultBadge(team,r[1],r[2],r[3])==='W').length;
+    const losses = rows.filter(r=>resultBadge(team,r[1],r[2],r[3])==='L').length;
+    const draws = rows.filter(r=>resultBadge(team,r[1],r[2],r[3])==='D').length;
+    card.innerHTML = `
+      <div class="team-head">
+        <h2>${team}</h2>
+        <span class="div-tag">${div} · ${wins}W ${draws?draws+'D ':''}${losses}L</span>
+      </div>
+      <table>
+        <thead><tr><th>Date</th><th>Result</th><th>Opponent</th><th>Score</th><th>Comp</th></tr></thead>
+        <tbody>
+          ${rows.map(r=>{
+            const [date,home,away,score,comp] = r;
+            const isHome = team===home;
+            const opp = isHome? away: home;
+            const badge = resultBadge(team,home,away,score);
+            const scoreDisplay = isHome? score : score.split('-').reverse().join('-');
+            return `<tr>
+              <td class="date">${date}</td>
+              <td><span class="res ${badge}">${badge}</span></td>
+              <td class="opp">${opp} <span style="color:var(--muted);font-size:.75rem;">${isHome?'(H)':'(A)'}</span></td>
+              <td class="score">${scoreDisplay}</td>
+              <td><span class="comp ${comp}">${comp==='C'?'Cup':'League'}</span></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
+    resultsDiv.appendChild(card);
+  });
+}
+
+divSel.addEventListener('change', ()=>{ populateTeamSelect(); render(); });
+teamSel.addEventListener('change', render);
+
+populateTeamSelect();
+render();
+</script>
+</body>
+</html>

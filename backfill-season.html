@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backfill Season - Stapleford Cue Stars Pool Team</title>
+<style>
+  :root{
+    --felt: #0f4d3a;
+    --felt-dark: #0a3a2b;
+    --rail: #4a2c1d;
+    --rail-dark: #331f14;
+    --ivory: #f3ede0;
+    --gold: #c9a227;
+    --line: rgba(243,237,224,0.16);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(255,255,255,0.04), transparent 40%),
+      var(--felt);
+    background-image:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px),
+      var(--felt);
+    font-family: 'Segoe UI', -apple-system, system-ui, sans-serif;
+    color: var(--ivory);
+    padding-bottom: 60px;
+  }
+  .rail{
+    background: linear-gradient(180deg, var(--rail) 0%, var(--rail-dark) 100%);
+    border-bottom: 4.5px solid var(--gold);
+    padding: 24px 15px 20px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+  }
+  .rail-inner{ max-width: 560px; margin: 0 auto; }
+  .back-link{
+    color: var(--gold);
+    font-size: 12px;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+  h1{
+    font-family: 'Oswald', 'Arial Narrow', sans-serif;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: clamp(19px, 4vw, 30px);
+    margin: 4px 0 0;
+    color: var(--ivory);
+    text-shadow: 0 2px 0 rgba(0,0,0,0.3);
+  }
+
+  main{
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 28px 20px 0;
+  }
+
+  .card{
+    background: rgba(0,0,0,0.18);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 22px;
+  }
+
+  .field{ margin-bottom: 16px; }
+  .field label{
+    display:block;
+    color: var(--gold);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .field input{
+    width: 100%;
+    background: var(--ivory);
+    color: #1c1b19;
+    border: 1px solid var(--line);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .field input:focus{ outline:none; border-color: var(--gold); }
+
+  .scan-btn, .backfill-btn{
+    width: 100%;
+    background: var(--gold);
+    color: var(--rail-dark);
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+  .scan-btn:hover, .backfill-btn:hover{ filter: brightness(1.08); }
+  .backfill-btn{ background: #d9534f; color: var(--ivory); }
+
+  .status-msg{
+    font-size: 13px;
+    margin-top: 14px;
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.15);
+  }
+
+  .not-admin{ text-align: center; padding: 50px 24px; color: rgba(243,237,224,0.6); }
+  .not-admin h2{
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--ivory);
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+
+  .hidden{ display:none !important; }
+
+  .overlay{
+    position: fixed; inset:0;
+    background: rgba(0,0,0,0.55);
+    display:none;
+    align-items:center; justify-content:center;
+    padding: 20px;
+    z-index: 50;
+  }
+  .overlay.show{ display:flex; }
+  .modal{
+    background: var(--rail);
+    border: 1px solid var(--gold);
+    border-radius: 10px;
+    padding: 26px;
+    max-width: 320px;
+    width: 100%;
+    text-align:center;
+  }
+  .modal h2{
+    margin: 0 0 6px;
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 18px;
+    color: var(--ivory);
+  }
+  .modal p{ font-size: 13px; color: rgba(243,237,224,0.7); margin: 0 0 14px; }
+  .modal-actions{ display:flex; gap: 10px; margin-top: 6px; }
+  .modal-actions button{
+    flex:1; padding: 10px; border-radius: 6px; border: none;
+    font-weight: 700; cursor: pointer; font-size: 13px;
+  }
+  .modal-actions .confirm{ background: #d9534f; color: var(--ivory); }
+  .modal-actions .cancel{ background: transparent; color: var(--ivory); border: 1px solid var(--line); }
+</style>
+</head>
+<body>
+
+<div class="rail">
+  <div class="rail-inner">
+    <a class="back-link" href="index.html">&larr; Home</a>
+    <h1>Backfill Season</h1>
+  </div>
+</div>
+
+<main>
+
+  <div class="not-admin hidden" id="notAdminView">
+    <h2>Admins Only</h2>
+    <p>You need to be signed in as admin. Log in on the home page, then reopen this page.</p>
+    <p><a class="back-link" href="index.html">&larr; Back to Home</a></p>
+  </div>
+
+  <div class="card hidden" id="toolView">
+    <div class="field">
+      <label for="seasonValue">Season value to fill in</label>
+      <input type="text" id="seasonValue" placeholder="e.g. 2026" maxlength="20" value="2026">
+    </div>
+
+    <button type="button" class="scan-btn" id="scanBtn">Scan for Missing Seasons</button>
+    <div class="status-msg hidden" id="scanMsg"></div>
+
+    <button type="button" class="backfill-btn hidden" id="backfillBtn">Backfill Now</button>
+    <div class="status-msg hidden" id="backfillMsg"></div>
+  </div>
+
+</main>
+
+<div class="overlay" id="confirmOverlay">
+  <div class="modal">
+    <h2>Are You Sure?</h2>
+    <p id="confirmSummary"></p>
+    <div class="modal-actions">
+      <button type="button" class="cancel" id="confirmNo">No</button>
+      <button type="button" class="confirm" id="confirmYes">Yes, Backfill</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAiIaXtQRBvDGFllrzmjYbx_Br1mR65Ox8",
+    authDomain: "stapleford-cue-stars.firebaseapp.com",
+    projectId: "stapleford-cue-stars",
+    storageBucket: "stapleford-cue-stars.firebasestorage.app",
+    messagingSenderId: "488893378210",
+    appId: "1:488893378210:web:9f81ed4b389443081031fb"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  const notAdminView = document.getElementById('notAdminView');
+  const toolView = document.getElementById('toolView');
+  const seasonValue = document.getElementById('seasonValue');
+  const scanBtn = document.getElementById('scanBtn');
+  const scanMsg = document.getElementById('scanMsg');
+  const backfillBtn = document.getElementById('backfillBtn');
+  const backfillMsg = document.getElementById('backfillMsg');
+  const confirmOverlay = document.getElementById('confirmOverlay');
+  const confirmSummary = document.getElementById('confirmSummary');
+  const confirmYes = document.getElementById('confirmYes');
+  const confirmNo = document.getElementById('confirmNo');
+
+  let missingDocs = [];
+
+  auth.onAuthStateChanged((user) => {
+    if(user){
+      notAdminView.classList.add('hidden');
+      toolView.classList.remove('hidden');
+    } else {
+      toolView.classList.add('hidden');
+      notAdminView.classList.remove('hidden');
+    }
+  });
+
+  scanBtn.addEventListener('click', async () => {
+    scanMsg.classList.remove('hidden');
+    scanMsg.style.color = 'rgba(243,237,224,0.7)';
+    scanMsg.textContent = 'Scanning results…';
+    backfillBtn.classList.add('hidden');
+    backfillMsg.classList.add('hidden');
+
+    try{
+      const snapshot = await db.collection('results').get();
+      missingDocs = snapshot.docs.filter(doc => !doc.data().season);
+
+      if(missingDocs.length === 0){
+        scanMsg.style.color = '#8fd19e';
+        scanMsg.textContent = `Scanned ${snapshot.size} results. Every record already has a season set — nothing to do.`;
+      } else {
+        scanMsg.style.color = '#f3ede0';
+        scanMsg.textContent = `Scanned ${snapshot.size} results. Found ${missingDocs.length} with no season set.`;
+        backfillBtn.classList.remove('hidden');
+      }
+    } catch(e){
+      scanMsg.style.color = '#ff8a80';
+      scanMsg.textContent = 'Could not scan — make sure you are signed in as admin.';
+    }
+  });
+
+  backfillBtn.addEventListener('click', () => {
+    const val = seasonValue.value.trim();
+    if(!val){
+      backfillMsg.classList.remove('hidden');
+      backfillMsg.style.color = '#ff8a80';
+      backfillMsg.textContent = 'Please enter a season value first.';
+      return;
+    }
+    confirmSummary.textContent = `Set season to "${val}" on ${missingDocs.length} result${missingDocs.length === 1 ? '' : 's'} that currently have no season. This cannot be undone.`;
+    confirmOverlay.classList.add('show');
+  });
+
+  confirmNo.addEventListener('click', () => confirmOverlay.classList.remove('show'));
+
+  confirmYes.addEventListener('click', async () => {
+    confirmOverlay.classList.remove('show');
+    const val = seasonValue.value.trim();
+    backfillMsg.classList.remove('hidden');
+    backfillMsg.style.color = 'rgba(243,237,224,0.7)';
+    backfillMsg.textContent = 'Updating…';
+
+    try{
+      // Firestore batches are capped at 500 writes — chunk if needed
+      for(let i = 0; i < missingDocs.length; i += 450){
+        const chunk = missingDocs.slice(i, i + 450);
+        const batch = db.batch();
+        chunk.forEach(doc => batch.update(doc.ref, { season: val }));
+        await batch.commit();
+      }
+      backfillMsg.style.color = '#8fd19e';
+      backfillMsg.textContent = `Done — set season to "${val}" on ${missingDocs.length} result${missingDocs.length === 1 ? '' : 's'}.`;
+      backfillBtn.classList.add('hidden');
+      missingDocs = [];
+    } catch(e){
+      backfillMsg.style.color = '#ff8a80';
+      backfillMsg.textContent = 'Something went wrong partway through — click Scan again to check what still needs updating.';
+    }
+  });
+</script>
+</body>
+</html>
