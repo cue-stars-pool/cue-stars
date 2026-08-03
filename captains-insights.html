@@ -271,6 +271,8 @@
     <div class="attendance-card" id="attendanceCard"></div>
     <div class="attendance-count" id="attendanceCount">0 players ticked</div>
     <button type="button" class="generate-btn" id="generateBtn">Generate Best Pick</button>
+    <button type="button" class="generate-btn" id="clearLineupBtn" style="background:transparent; border:1.5px solid var(--line); color:var(--ivory); margin-top:8px;">Clear Lineup</button>
+    <button type="button" class="generate-btn" id="resetFormBtn" style="background:transparent; border:1.5px solid var(--line); color:var(--ivory); margin-top:8px;">Reset Form</button>
     <div class="generate-msg" id="generateMsg"></div>
   </div>
 
@@ -281,18 +283,6 @@
       <div class="lineup-summary-title">Why These Picks?</div>
       <div id="lineupSummaryText"></div>
     </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">Hot Picks</div>
-    <div class="pick-list" id="hotPicksList"></div>
-    <div class="empty-note hidden" id="hotPicksEmpty">Not enough recent form to call a hot pick yet.</div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">Cold Picks</div>
-    <div class="pick-list" id="coldPicksList"></div>
-    <div class="empty-note hidden" id="coldPicksEmpty">No one's on a losing run right now.</div>
   </div>
 
 </main>
@@ -323,15 +313,12 @@
   const attendanceCard = document.getElementById('attendanceCard');
   const attendanceCount = document.getElementById('attendanceCount');
   const generateBtn = document.getElementById('generateBtn');
+  const clearLineupBtn = document.getElementById('clearLineupBtn');
+  const resetFormBtn = document.getElementById('resetFormBtn');
   const generateMsg = document.getElementById('generateMsg');
   const lineupSection = document.getElementById('lineupSection');
   const lineupList = document.getElementById('lineupList');
   const lineupSummaryText = document.getElementById('lineupSummaryText');
-
-  const hotPicksList = document.getElementById('hotPicksList');
-  const hotPicksEmpty = document.getElementById('hotPicksEmpty');
-  const coldPicksList = document.getElementById('coldPicksList');
-  const coldPicksEmpty = document.getElementById('coldPicksEmpty');
 
   let allResults = [];
   let activePlayerNames = [];
@@ -354,62 +341,6 @@
         return b.d - a.d;
       })
       .map(x => x.r);
-  }
-
-  function currentStreak(sortedResults){
-    if(sortedResults.length === 0) return { type: null, length: 0 };
-    const first = sortedResults[0].result;
-    let length = 0;
-    for(const r of sortedResults){
-      if(r.result === first){ length++; } else { break; }
-    }
-    return { type: first, length };
-  }
-
-  // ---------- Hot / Cold picks ----------
-  function computeInsights(){
-    const summaries = activePlayerNames.map(name => {
-      const sorted = sortedResultsForPlayer(name);
-      const streak = currentStreak(sorted);
-      const played = sorted.length;
-      const won = sorted.filter(r => r.result === 'Win').length;
-      const success = played > 0 ? Math.round((won / played) * 100) : 0;
-      return { name, sorted, streak, played, won, success };
-    });
-
-    const hot = summaries
-      .filter(s => s.streak.type === 'Win' && s.streak.length >= 1)
-      .sort((a, b) => b.streak.length - a.streak.length)
-      .slice(0, Math.max(3, summaries.filter(s => s.streak.type === 'Win' && s.streak.length >= 2).length));
-
-    const cold = summaries
-      .filter(s => s.streak.type === 'Lose' && s.streak.length >= 2)
-      .sort((a, b) => b.streak.length - a.streak.length);
-
-    renderPickList(hotPicksList, hotPicksEmpty, hot.slice(0, Math.max(3, hot.length)), 'hot', (s) =>
-      `Won last ${s.streak.length} in a row`
-    );
-    renderPickList(coldPicksList, coldPicksEmpty, cold, 'cold', (s) =>
-      `Lost last ${s.streak.length} in a row`
-    );
-  }
-
-  function renderPickList(listEl, emptyEl, items, kind, reasonFn){
-    if(items.length === 0){
-      listEl.innerHTML = '';
-      emptyEl.classList.remove('hidden');
-      return;
-    }
-    emptyEl.classList.add('hidden');
-    listEl.innerHTML = items.map(s => `
-      <div class="pick-row">
-        <div>
-          <div class="pick-name">${s.name}</div>
-          <div class="pick-reason">${reasonFn(s)}</div>
-        </div>
-        <span class="pick-badge ${kind}">${kind === 'hot' ? 'Hot pick' : 'Cold pick'}</span>
-      </div>
-    `).join('');
   }
 
   // ---------- Attendance picker ----------
@@ -485,6 +416,23 @@
 
     return { name, leg, stat, note, form, formApplied, finalScore };
   }
+
+  clearLineupBtn.addEventListener('click', () => {
+    lineupSection.classList.add('hidden');
+    lineupList.innerHTML = '';
+    lineupSummaryText.innerHTML = '';
+    generateMsg.textContent = '';
+  });
+
+  resetFormBtn.addEventListener('click', () => {
+    venueSelect.value = '';
+    attendingNames.clear();
+    renderAttendanceCard();
+    lineupSection.classList.add('hidden');
+    lineupList.innerHTML = '';
+    lineupSummaryText.innerHTML = '';
+    generateMsg.textContent = '';
+  });
 
   generateBtn.addEventListener('click', () => {
     generateMsg.textContent = '';
@@ -599,10 +547,6 @@
   }
 
   // ---------- Data loading ----------
-  function refreshAll(){
-    computeInsights();
-  }
-
   let dataLoaded = false;
   function loadData(){
     if(dataLoaded) return;
@@ -614,12 +558,10 @@
         if(!activePlayerNames.includes(name)){ attendingNames.delete(name); }
       });
       renderAttendanceCard();
-      refreshAll();
     });
 
     db.collection('results').onSnapshot((snapshot) => {
       allResults = snapshot.docs.map(doc => doc.data());
-      refreshAll();
     });
 
     db.collection('venues').orderBy('name', 'asc').onSnapshot((snapshot) => {
