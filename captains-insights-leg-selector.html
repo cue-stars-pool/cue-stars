@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leg Selector - Stapleford Cue Stars Pool Team</title>
+<style>
+  :root{
+    --felt: #0f4d3a;
+    --felt-dark: #0a3a2b;
+    --rail: #4a2c1d;
+    --rail-dark: #331f14;
+    --ivory: #f3ede0;
+    --gold: #c9a227;
+    --line: rgba(243,237,224,0.16);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(255,255,255,0.04), transparent 40%),
+      var(--felt);
+    background-image:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px),
+      var(--felt);
+    font-family: 'Segoe UI', -apple-system, system-ui, sans-serif;
+    color: var(--ivory);
+    padding-bottom: 60px;
+  }
+  .rail{
+    background: linear-gradient(180deg, var(--rail) 0%, var(--rail-dark) 100%);
+    border-bottom: 4.5px solid var(--gold);
+    padding: 24px 15px 20px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+  }
+  .rail-inner{ max-width: 640px; margin: 0 auto; }
+  .back-link{
+    color: var(--gold);
+    font-size: 12px;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+  h1{
+    font-family: 'Oswald', 'Arial Narrow', sans-serif;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: clamp(19px, 4vw, 30px);
+    margin: 4px 0 0;
+    color: var(--ivory);
+    text-shadow: 0 2px 0 rgba(0,0,0,0.3);
+  }
+
+  main{
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 24px 15px 0;
+  }
+
+  .section{ margin-bottom: 26px; }
+  .section-title{
+    color: var(--gold);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 12px;
+  }
+
+  .toggle-group{ display: flex; gap: 6px; flex-wrap: wrap; }
+  .toggle-btn{
+    flex: 0 0 auto;
+    min-width: 40px;
+    padding: 10px 0;
+    border-radius: 8px;
+    border: 1.5px solid var(--line);
+    background: transparent;
+    color: rgba(243,237,224,0.6);
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .toggle-btn.selected{
+    border-color: var(--gold);
+    background: var(--gold);
+    color: var(--rail-dark);
+  }
+
+  .field{ margin-bottom: 0; }
+  .field label{
+    display:block;
+    color: var(--gold);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .field select{
+    width: 100%;
+    background: var(--ivory);
+    color: #1c1b19;
+    border: 1px solid var(--line);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .field select:focus{ outline:none; border-color: var(--gold); }
+  .field select option{ color: #1c1b19; }
+
+  .generate-btn{
+    width: 100%;
+    background: var(--gold);
+    color: var(--rail-dark);
+    border: none;
+    padding: 13px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+  .generate-btn:hover{ filter: brightness(1.08); }
+
+  .generate-msg{
+    font-size: 12px;
+    margin-top: 10px;
+    min-height: 16px;
+    text-align: center;
+    color: #ff8a80;
+  }
+
+  .rank-list{ display: flex; flex-direction: column; gap: 8px; }
+  .rank-row{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(0,0,0,0.18);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 11px 14px;
+  }
+  .rank-num{
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--gold);
+    width: 26px;
+    flex-shrink: 0;
+    text-align: center;
+  }
+  .rank-info{ flex: 1; min-width: 0; }
+  .rank-name{ font-size: 14px; font-weight: 700; color: var(--ivory); }
+  .rank-reason{ font-size: 11.5px; color: rgba(243,237,224,0.55); margin-top: 2px; }
+  .rank-tier{
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: rgba(243,237,224,0.45);
+    margin-top: 2px;
+  }
+  .rank-pct{
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #8fd19e;
+    flex-shrink: 0;
+  }
+  .rank-exclude-btn{
+    background: transparent;
+    border: 1px solid rgba(217,83,79,0.4);
+    color: #ff8a80;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .rank-exclude-btn:hover{ background: rgba(217,83,79,0.15); }
+
+  .excluded-note{
+    font-size: 11.5px;
+    color: rgba(243,237,224,0.5);
+    margin-top: 12px;
+  }
+  .excluded-note strong{ color: rgba(243,237,224,0.7); }
+
+  .empty-note{
+    font-size: 13px;
+    color: rgba(243,237,224,0.5);
+    padding: 16px;
+    text-align: center;
+    background: rgba(0,0,0,0.15);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+
+  .not-admin{ text-align: center; padding: 50px 24px; color: rgba(243,237,224,0.6); }
+  .not-admin h2{
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--ivory);
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+
+  .hidden{ display:none !important; }
+</style>
+</head>
+<body>
+
+<div class="rail">
+  <div class="rail-inner">
+    <a class="back-link" href="captains-insights.html">&larr; Captain's Insights</a>
+    <h1>Leg Selector</h1>
+  </div>
+</div>
+
+<div class="not-admin hidden" id="notAdminView">
+  <div style="max-width:640px; margin:0 auto; padding:0 15px;">
+    <h2>Admins Only</h2>
+    <p>You need to be signed in as admin to view the Leg Selector.</p>
+    <p><a class="back-link" href="index.html">&larr; Back to Home</a></p>
+  </div>
+</div>
+
+<div class="hidden" id="pageContent">
+<main>
+
+  <div class="section">
+    <div class="section-title">Which Leg Is Next?</div>
+    <div class="toggle-group" id="legGroup">
+      <button type="button" class="toggle-btn selected" data-value="1">1</button>
+      <button type="button" class="toggle-btn" data-value="2">2</button>
+      <button type="button" class="toggle-btn" data-value="3">3</button>
+      <button type="button" class="toggle-btn" data-value="4">4</button>
+      <button type="button" class="toggle-btn" data-value="5">5</button>
+      <button type="button" class="toggle-btn" data-value="6">6</button>
+      <button type="button" class="toggle-btn" data-value="7">7</button>
+      <button type="button" class="toggle-btn" data-value="8">8</button>
+      <button type="button" class="toggle-btn" data-value="9">9</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Venue</div>
+    <div class="field">
+      <label for="venueSelect">Playing at</label>
+      <select id="venueSelect">
+        <option value="">Loading venues…</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Minimum Tier Player Level</div>
+    <div class="field">
+      <label for="minTierSelect">Only consider</label>
+      <select id="minTierSelect">
+        <option value="1">Tier 1 only</option>
+        <option value="2">Tier 1 &amp; Tier 2</option>
+        <option value="3" selected>Tier 1, Tier 2 &amp; Tier 3</option>
+      </select>
+    </div>
+  </div>
+
+  <button type="button" class="generate-btn" id="generateBtn">Leg Generator</button>
+  <div class="generate-msg" id="generateMsg"></div>
+
+  <div class="section hidden" id="rankedSection" style="margin-top:26px;">
+    <div class="section-title">Ranked — Best Pick for This Leg</div>
+    <div class="rank-list" id="rankedList"></div>
+    <div class="empty-note hidden" id="rankedEmpty">No eligible players left to rank — try lowering the minimum tier or clearing an exclusion.</div>
+    <div class="excluded-note hidden" id="excludedNote"></div>
+  </div>
+
+</main>
+</div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAiIaXtQRBvDGFllrzmjYbx_Br1mR65Ox8",
+    authDomain: "stapleford-cue-stars.firebaseapp.com",
+    projectId: "stapleford-cue-stars",
+    storageBucket: "stapleford-cue-stars.firebasestorage.app",
+    messagingSenderId: "488893378210",
+    appId: "1:488893378210:web:9f81ed4b389443081031fb"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  const notAdminView = document.getElementById('notAdminView');
+  const pageContent = document.getElementById('pageContent');
+
+  const legGroup = document.getElementById('legGroup');
+  const venueSelect = document.getElementById('venueSelect');
+  const minTierSelect = document.getElementById('minTierSelect');
+  const generateBtn = document.getElementById('generateBtn');
+  const generateMsg = document.getElementById('generateMsg');
+  const rankedSection = document.getElementById('rankedSection');
+  const rankedList = document.getElementById('rankedList');
+  const rankedEmpty = document.getElementById('rankedEmpty');
+  const excludedNote = document.getElementById('excludedNote');
+
+  let allPlayers = [];
+  let allResults = [];
+  let selectedLeg = 1;
+  let manuallyExcluded = new Set();
+  let hasGenerated = false;
+
+  legGroup.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      legGroup.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedLeg = Number(btn.dataset.value);
+      manuallyExcluded.clear();
+      hasGenerated = false;
+      rankedSection.classList.add('hidden');
+      generateMsg.textContent = '';
+    });
+  });
+
+  function parseDMY(str){
+    const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(str || '');
+    if(!m) return null;
+    return new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]));
+  }
+
+  function sortedResultsForPlayer(name){
+    return allResults
+      .filter(r => r.playerName === name)
+      .map(r => ({ r, d: parseDMY(r.matchDate) }))
+      .sort((a, b) => {
+        if(!a.d && !b.d) return 0;
+        if(!a.d) return 1;
+        if(!b.d) return -1;
+        return b.d - a.d;
+      })
+      .map(x => x.r);
+  }
+
+  function statsFor(results){
+    const played = results.length;
+    const won = results.filter(r => r.result === 'Win').length;
+    const success = played > 0 ? (won / played) * 100 : null;
+    return { played, won, success };
+  }
+
+  function scoreForLeg(name, leg, venue){
+    const playerResults = allResults.filter(r => r.playerName === name);
+    const venueLegResults = venue
+      ? playerResults.filter(r => Number(r.leg) === leg && (r.homeTeam === venue || r.awayTeam === venue))
+      : [];
+    const legResults = playerResults.filter(r => Number(r.leg) === leg);
+
+    let basisStat, note;
+    if(venue && venueLegResults.length >= 2){
+      basisStat = statsFor(venueLegResults);
+      note = `Leg ${leg} at ${venue}`;
+    } else if(legResults.length >= 1){
+      basisStat = statsFor(legResults);
+      note = `Leg ${leg} overall`;
+    } else {
+      basisStat = statsFor(playerResults);
+      note = playerResults.length > 0 ? 'no history on this leg — overall form' : 'no results yet';
+    }
+    const baseVal = basisStat.success !== null ? basisStat.success : 50;
+
+    const recentFive = sortedResultsForPlayer(name).slice(0, 5);
+    const recentStat = statsFor(recentFive);
+    const recentVal = recentStat.success !== null ? recentStat.success : baseVal;
+
+    const finalScore = (baseVal * 0.7) + (recentVal * 0.3);
+
+    return { name, played: basisStat.played, note, finalScore };
+  }
+
+  const TIER_ALLOW = {
+    '1': ['Tier 1'],
+    '2': ['Tier 1', 'Tier 2'],
+    '3': ['Tier 1', 'Tier 2', 'Tier 3']
+  };
+
+  generateBtn.addEventListener('click', () => {
+    manuallyExcluded.clear();
+    runGeneration();
+  });
+
+  function runGeneration(){
+    generateMsg.textContent = '';
+    const venue = venueSelect.value;
+
+    if(!venue){
+      generateMsg.textContent = 'Please select a venue first.';
+      rankedSection.classList.add('hidden');
+      return;
+    }
+
+    const allowedTiers = TIER_ALLOW[minTierSelect.value];
+    const eligible = allPlayers.filter(p =>
+      p.tier && allowedTiers.includes(p.tier) && !manuallyExcluded.has(p.name)
+    );
+
+    hasGenerated = true;
+    rankedSection.classList.remove('hidden');
+
+    if(eligible.length === 0){
+      rankedList.innerHTML = '';
+      rankedEmpty.classList.remove('hidden');
+      updateExcludedNote();
+      return;
+    }
+    rankedEmpty.classList.add('hidden');
+
+    const scored = eligible
+      .map(p => ({ ...scoreForLeg(p.name, selectedLeg, venue), tier: p.tier }))
+      .sort((a, b) => b.finalScore - a.finalScore);
+
+    rankedList.innerHTML = scored.map((entry, i) => `
+      <div class="rank-row">
+        <div class="rank-num">${i + 1}</div>
+        <div class="rank-info">
+          <div class="rank-name">${entry.name}</div>
+          <div class="rank-reason">${entry.played} played · ${entry.note}</div>
+          <div class="rank-tier">${entry.tier}</div>
+        </div>
+        <div class="rank-pct">${Math.round(entry.finalScore)}%</div>
+        <button type="button" class="rank-exclude-btn" data-name="${entry.name}">Already Played</button>
+      </div>
+    `).join('');
+
+    updateExcludedNote();
+  }
+
+  function updateExcludedNote(){
+    if(manuallyExcluded.size === 0){
+      excludedNote.classList.add('hidden');
+      return;
+    }
+    excludedNote.classList.remove('hidden');
+    excludedNote.innerHTML = `<strong>Excluded (already played):</strong> ${Array.from(manuallyExcluded).join(', ')}`;
+  }
+
+  rankedList.addEventListener('click', (e) => {
+    if(e.target.matches('.rank-exclude-btn')){
+      const name = e.target.dataset.name;
+      manuallyExcluded.add(name);
+      runGeneration();
+    }
+  });
+
+  // ---------- Data loading ----------
+  let dataLoaded = false;
+  function loadData(){
+    if(dataLoaded) return;
+    dataLoaded = true;
+
+    db.collection('players').orderBy('name', 'asc').onSnapshot((snapshot) => {
+      allPlayers = snapshot.docs.map(doc => ({
+        id: doc.id,
+        name: doc.data().name,
+        tier: doc.data().tier || null
+      }));
+      if(hasGenerated){ runGeneration(); }
+    });
+
+    db.collection('results').onSnapshot((snapshot) => {
+      allResults = snapshot.docs.map(doc => doc.data());
+    });
+
+    db.collection('venues').orderBy('name', 'asc').onSnapshot((snapshot) => {
+      if(snapshot.empty){
+        venueSelect.innerHTML = '<option value="">No venues yet</option>';
+        return;
+      }
+      const prevValue = venueSelect.value;
+      venueSelect.innerHTML = '<option value="">Select venue…</option>' + snapshot.docs.map(doc =>
+        `<option value="${doc.data().name}">${doc.data().name}</option>`
+      ).join('');
+      if(prevValue){ venueSelect.value = prevValue; }
+    });
+  }
+
+  auth.onAuthStateChanged((user) => {
+    if(user){
+      notAdminView.classList.add('hidden');
+      pageContent.classList.remove('hidden');
+      loadData();
+    } else {
+      pageContent.classList.add('hidden');
+      notAdminView.classList.remove('hidden');
+    }
+  });
+</script>
+</body>
+</html>

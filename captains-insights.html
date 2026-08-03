@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Captain's Insights - Stapleford Cue Stars Pool Team</title>
+<style>
+  :root{
+    --felt: #0f4d3a;
+    --felt-dark: #0a3a2b;
+    --rail: #4a2c1d;
+    --rail-dark: #331f14;
+    --ivory: #f3ede0;
+    --gold: #c9a227;
+    --line: rgba(243,237,224,0.16);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(255,255,255,0.04), transparent 40%),
+      var(--felt);
+    background-image:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px),
+      var(--felt);
+    font-family: 'Segoe UI', -apple-system, system-ui, sans-serif;
+    color: var(--ivory);
+    padding-bottom: 60px;
+  }
+  .rail{
+    background: linear-gradient(180deg, var(--rail) 0%, var(--rail-dark) 100%);
+    border-bottom: 4.5px solid var(--gold);
+    padding: 24px 15px 20px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+  }
+  .rail-inner{ max-width: 640px; margin: 0 auto; }
+  .back-link{
+    color: var(--gold);
+    font-size: 12px;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+  h1{
+    font-family: 'Oswald', 'Arial Narrow', sans-serif;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: clamp(19px, 4vw, 30px);
+    margin: 4px 0 0;
+    color: var(--ivory);
+    text-shadow: 0 2px 0 rgba(0,0,0,0.3);
+  }
+
+  main{
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 24px 15px 0;
+  }
+
+  .tool-btn-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .tool-btn{
+    background: var(--gold);
+    color: var(--rail-dark);
+    border: 1.5px solid var(--gold);
+    border-radius: 10px;
+    padding: 18px 10px;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .tool-btn:hover,
+  .tool-btn:active{
+    background: transparent;
+    color: var(--gold);
+  }
+
+  .not-admin{ text-align: center; padding: 50px 24px; color: rgba(243,237,224,0.6); }
+  .not-admin h2{
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--ivory);
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+
+  .hidden{ display:none !important; }
+</style>
+</head>
+<body>
+
+<div class="rail">
+  <div class="rail-inner">
+    <a class="back-link" href="index.html">&larr; Home</a>
+    <h1>Captain's Insights</h1>
+  </div>
+</div>
+
+<div class="not-admin hidden" id="notAdminView">
+  <div style="max-width:640px; margin:0 auto; padding:0 15px;">
+    <h2>Admins Only</h2>
+    <p>You need to be signed in as admin to view Captain's Insights.</p>
+    <p><a class="back-link" href="index.html">&larr; Back to Home</a></p>
+  </div>
+</div>
+
+<div class="hidden" id="pageContent">
+<main>
+
+  <div class="tool-btn-grid">
+    <button type="button" class="tool-btn" id="lineupPredictorBtn">Line Up Predictor</button>
+    <button type="button" class="tool-btn" id="legSelectorBtn">Leg Selector</button>
+  </div>
+
+</main>
+</div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAiIaXtQRBvDGFllrzmjYbx_Br1mR65Ox8",
+    authDomain: "stapleford-cue-stars.firebaseapp.com",
+    projectId: "stapleford-cue-stars",
+    storageBucket: "stapleford-cue-stars.firebasestorage.app",
+    messagingSenderId: "488893378210",
+    appId: "1:488893378210:web:9f81ed4b389443081031fb"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  const notAdminView = document.getElementById('notAdminView');
+  const pageContent = document.getElementById('pageContent');
+  const lineupPredictorBtn = document.getElementById('lineupPredictorBtn');
+  const legSelectorBtn = document.getElementById('legSelectorBtn');
+
+  lineupPredictorBtn.addEventListener('click', () => {
+    window.location.href = 'captains-insights-line-up.html';
+  });
+  legSelectorBtn.addEventListener('click', () => {
+    window.location.href = 'captains-insights-leg-selector.html';
+  });
+
+  auth.onAuthStateChanged((user) => {
+    if(user){
+      notAdminView.classList.add('hidden');
+      pageContent.classList.remove('hidden');
+    } else {
+      pageContent.classList.add('hidden');
+      notAdminView.classList.remove('hidden');
+    }
+  });
+</script>
+</body>
+</html>
