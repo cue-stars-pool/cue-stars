@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Line Up Predictor - Stapleford Cue Stars Pool Team</title>
+<style>
+  :root{
+    --felt: #0f4d3a;
+    --felt-dark: #0a3a2b;
+    --rail: #4a2c1d;
+    --rail-dark: #331f14;
+    --ivory: #f3ede0;
+    --gold: #c9a227;
+    --line: rgba(243,237,224,0.16);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(255,255,255,0.04), transparent 40%),
+      var(--felt);
+    background-image:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px),
+      var(--felt);
+    font-family: 'Segoe UI', -apple-system, system-ui, sans-serif;
+    color: var(--ivory);
+    padding-bottom: 60px;
+  }
+  .rail{
+    background: linear-gradient(180deg, var(--rail) 0%, var(--rail-dark) 100%);
+    border-bottom: 4.5px solid var(--gold);
+    padding: 24px 15px 20px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+  }
+  .rail-inner{ max-width: 640px; margin: 0 auto; }
+  .back-link{
+    color: var(--gold);
+    font-size: 12px;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+  h1{
+    font-family: 'Oswald', 'Arial Narrow', sans-serif;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: clamp(19px, 4vw, 30px);
+    margin: 4px 0 0;
+    color: var(--ivory);
+    text-shadow: 0 2px 0 rgba(0,0,0,0.3);
+  }
+
+  main{
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 24px 15px 0;
+  }
+
+  .section{ margin-bottom: 30px; }
+  .section-title{
+    color: var(--gold);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 12px;
+  }
+
+  .field{ margin-bottom: 16px; }
+  .field label{
+    display:block;
+    color: var(--gold);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .field select{
+    width: 100%;
+    background: var(--ivory);
+    color: #1c1b19;
+    border: 1px solid var(--line);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .field select:focus{ outline:none; border-color: var(--gold); }
+  .field select option{ color: #1c1b19; }
+
+  .picker-card{
+    background: rgba(0,0,0,0.18);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .picker-row{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+  }
+  .picker-row:last-child{ border-bottom: none; }
+  .picker-row input[type="checkbox"]{
+    width: 19px; height: 19px; flex-shrink: 0;
+    accent-color: var(--gold); cursor: pointer;
+  }
+  .picker-row label{
+    flex: 1; cursor: pointer; font-weight: 600; color: var(--ivory);
+  }
+  .picker-count{
+    font-size: 11px;
+    color: rgba(243,237,224,0.55);
+    margin: 10px 0 0;
+  }
+
+  .tier-label{
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .tier-label.exclude{ background: rgba(217,83,79,0.18); color: #ff8a80; }
+  .tier-label.tier3{ background: rgba(243,237,224,0.1); color: rgba(243,237,224,0.7); }
+  .tier-label.tier2{ background: rgba(76,111,165,0.2); color: #8fb4e8; }
+  .tier-label.tier1{ background: rgba(143,209,158,0.18); color: #8fd19e; }
+  .tier-label.unrated{ background: rgba(243,237,224,0.06); color: rgba(243,237,224,0.4); }
+
+  .generate-btn{
+    width: 100%;
+    background: var(--gold);
+    color: var(--rail-dark);
+    border: none;
+    padding: 13px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 14px;
+  }
+  .generate-btn:hover{ filter: brightness(1.08); }
+
+  .generate-msg{
+    font-size: 12px;
+    margin-top: 10px;
+    min-height: 16px;
+    text-align: center;
+    color: #ff8a80;
+  }
+
+  .rank-list{ display: flex; flex-direction: column; gap: 8px; }
+  .rank-row{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(0,0,0,0.18);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 11px 14px;
+  }
+  .rank-num{
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--gold);
+    width: 26px;
+    flex-shrink: 0;
+    text-align: center;
+  }
+  .rank-info{ flex: 1; min-width: 0; }
+  .rank-name{ font-size: 14px; font-weight: 700; color: var(--ivory); }
+  .rank-reason{ font-size: 11.5px; color: rgba(243,237,224,0.55); margin-top: 2px; }
+  .rank-pct{
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #8fd19e;
+    flex-shrink: 0;
+  }
+
+  .tier-group{ margin-top: 22px; }
+  .tier-group-title{
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 8px;
+  }
+  .tier-group-title.tier1{ color: #8fd19e; }
+  .tier-group-title.tier2{ color: #8fb4e8; }
+  .tier-group-title.tier3{ color: rgba(243,237,224,0.7); }
+
+  .summary-box{
+    margin-top: 16px;
+    background: rgba(0,0,0,0.15);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(243,237,224,0.8);
+  }
+  .summary-box strong{ color: var(--ivory); }
+  .summary-box-title{
+    color: var(--gold);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  .empty-note{ font-size: 12px; color: rgba(243,237,224,0.45); padding: 4px 0; }
+
+  .not-admin{ text-align: center; padding: 50px 24px; color: rgba(243,237,224,0.6); }
+  .not-admin h2{
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--ivory);
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+
+  .hidden{ display:none !important; }
+</style>
+</head>
+<body>
+
+<div class="rail">
+  <div class="rail-inner">
+    <a class="back-link" href="captains-insights.html">&larr; Captain's Insights</a>
+    <h1>Line Up Predictor</h1>
+  </div>
+</div>
+
+<div class="not-admin hidden" id="notAdminView">
+  <div style="max-width:640px; margin:0 auto; padding:0 15px;">
+    <h2>Admins Only</h2>
+    <p>You need to be signed in as admin to view the Line Up Predictor.</p>
+    <p><a class="back-link" href="index.html">&larr; Back to Home</a></p>
+  </div>
+</div>
+
+<div class="hidden" id="pageContent">
+<main>
+
+  <div class="section">
+    <div class="section-title">Line Up Picker</div>
+    <div class="picker-card" id="pickerCard"></div>
+    <div class="picker-count" id="pickerCount">0 players ticked</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Venue</div>
+    <div class="field">
+      <label for="venueSelect">Playing at</label>
+      <select id="venueSelect">
+        <option value="">Loading venues…</option>
+      </select>
+    </div>
+    <button type="button" class="generate-btn" id="generateBtn">Line Up Generator</button>
+    <div class="generate-msg" id="generateMsg"></div>
+  </div>
+
+  <div class="section hidden" id="rankedSection">
+    <div class="section-title">Ranked — Best to Least</div>
+    <div class="rank-list" id="rankedList"></div>
+
+    <div class="tier-group">
+      <div class="tier-group-title tier1">Tier 1</div>
+      <div class="rank-list" id="tier1List"></div>
+      <div class="empty-note hidden" id="tier1Empty">No Tier 1 players selected.</div>
+    </div>
+
+    <div class="tier-group">
+      <div class="tier-group-title tier2">Tier 2</div>
+      <div class="rank-list" id="tier2List"></div>
+      <div class="empty-note hidden" id="tier2Empty">No Tier 2 players selected.</div>
+    </div>
+
+    <div class="tier-group">
+      <div class="tier-group-title tier3">Tier 3</div>
+      <div class="rank-list" id="tier3List"></div>
+      <div class="empty-note hidden" id="tier3Empty">No Tier 3 players selected.</div>
+    </div>
+
+    <div class="summary-box" id="summaryBox">
+      <div class="summary-box-title">Why This Ranking?</div>
+      <div id="summaryText"></div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAiIaXtQRBvDGFllrzmjYbx_Br1mR65Ox8",
+    authDomain: "stapleford-cue-stars.firebaseapp.com",
+    projectId: "stapleford-cue-stars",
+    storageBucket: "stapleford-cue-stars.firebasestorage.app",
+    messagingSenderId: "488893378210",
+    appId: "1:488893378210:web:9f81ed4b389443081031fb"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  const notAdminView = document.getElementById('notAdminView');
+  const pageContent = document.getElementById('pageContent');
+
+  const pickerCard = document.getElementById('pickerCard');
+  const pickerCount = document.getElementById('pickerCount');
+  const venueSelect = document.getElementById('venueSelect');
+  const generateBtn = document.getElementById('generateBtn');
+  const generateMsg = document.getElementById('generateMsg');
+  const rankedSection = document.getElementById('rankedSection');
+  const rankedList = document.getElementById('rankedList');
+  const tier1List = document.getElementById('tier1List');
+  const tier2List = document.getElementById('tier2List');
+  const tier3List = document.getElementById('tier3List');
+  const tier1Empty = document.getElementById('tier1Empty');
+  const tier2Empty = document.getElementById('tier2Empty');
+  const tier3Empty = document.getElementById('tier3Empty');
+  const summaryText = document.getElementById('summaryText');
+
+  let allPlayers = [];
+  let allResults = [];
+  let selectedNames = new Set();
+
+  function parseDMY(str){
+    const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(str || '');
+    if(!m) return null;
+    return new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]));
+  }
+
+  function sortedResultsForPlayer(name){
+    return allResults
+      .filter(r => r.playerName === name)
+      .map(r => ({ r, d: parseDMY(r.matchDate) }))
+      .sort((a, b) => {
+        if(!a.d && !b.d) return 0;
+        if(!a.d) return 1;
+        if(!b.d) return -1;
+        return b.d - a.d;
+      })
+      .map(x => x.r);
+  }
+
+  function tierInfo(player){
+    if(player.tier === 'Exclude') return { text: 'Exclude', cls: 'exclude' };
+    if(player.tier === 'Tier 1') return { text: 'Tier 1', cls: 'tier1' };
+    if(player.tier === 'Tier 2') return { text: 'Tier 2', cls: 'tier2' };
+    if(player.tier === 'Tier 3') return { text: 'Tier 3', cls: 'tier3' };
+    return { text: 'Unrated', cls: 'unrated' };
+  }
+
+  // ---------- Player picker ----------
+  function renderPickerCard(){
+    const sorted = [...allPlayers].sort((a, b) => {
+      const aIsNoPlayer = a.name.trim().toLowerCase() === 'no player';
+      const bIsNoPlayer = b.name.trim().toLowerCase() === 'no player';
+      if(aIsNoPlayer && !bIsNoPlayer) return 1;
+      if(!aIsNoPlayer && bIsNoPlayer) return -1;
+      return a.name.localeCompare(b.name);
+    });
+
+    if(sorted.length === 0){
+      pickerCard.innerHTML = '<div style="padding:16px; font-size:13px; color:rgba(243,237,224,0.5);">No players in Team List yet.</div>';
+      return;
+    }
+
+    pickerCard.innerHTML = sorted.map((p, i) => {
+      const t = tierInfo(p);
+      return `
+        <div class="picker-row">
+          <input type="checkbox" id="pick-${i}" data-name="${p.name}" ${selectedNames.has(p.name) ? 'checked' : ''}>
+          <label for="pick-${i}">${p.name}</label>
+          <span class="tier-label ${t.cls}">${t.text}</span>
+        </div>
+      `;
+    }).join('');
+    updatePickerCount();
+  }
+
+  function updatePickerCount(){
+    pickerCount.textContent = `${selectedNames.size} player${selectedNames.size === 1 ? '' : 's'} ticked`;
+  }
+
+  pickerCard.addEventListener('change', (e) => {
+    if(e.target.matches('input[type="checkbox"]')){
+      const name = e.target.dataset.name;
+      if(e.target.checked){ selectedNames.add(name); } else { selectedNames.delete(name); }
+      updatePickerCount();
+    }
+  });
+
+  // ---------- Scoring ----------
+  function statsFor(results){
+    const played = results.length;
+    const won = results.filter(r => r.result === 'Win').length;
+    const success = played > 0 ? (won / played) * 100 : null;
+    return { played, won, success };
+  }
+
+  function computeScore(name, venue){
+    const playerResults = allResults.filter(r => r.playerName === name);
+    const overall = statsFor(playerResults);
+    const recentFive = sortedResultsForPlayer(name).slice(0, 5);
+    const recent = statsFor(recentFive);
+    const venueResults = venue ? playerResults.filter(r => r.homeTeam === venue || r.awayTeam === venue) : [];
+    const venueStat = venue ? statsFor(venueResults) : { played: 0, won: 0, success: null };
+
+    const overallVal = overall.success !== null ? overall.success : 50;
+    const recentVal = recent.success !== null ? recent.success : overallVal;
+    const venueVal = venueStat.success !== null ? venueStat.success : overallVal;
+
+    const finalScore = (recentVal * 0.3) + (overallVal * 0.3) + (venueVal * 0.4);
+
+    return {
+      name, overall, recent, venueStat, finalScore,
+      hasOverall: overall.played > 0,
+      hasRecent: recent.played > 0,
+      hasVenue: venueStat.played > 0
+    };
+  }
+
+  // ---------- Generate ----------
+  generateBtn.addEventListener('click', () => {
+    generateMsg.textContent = '';
+    const venue = venueSelect.value;
+    const attendees = Array.from(selectedNames);
+
+    if(!venue){
+      generateMsg.textContent = 'Please select a venue first.';
+      return;
+    }
+    if(attendees.length === 0){
+      generateMsg.textContent = 'Tick at least one player to rank.';
+      return;
+    }
+
+    const playerMap = {};
+    allPlayers.forEach(p => { playerMap[p.name] = p; });
+
+    const considered = attendees.filter(name => {
+      const p = playerMap[name];
+      return p && p.tier !== 'Exclude';
+    });
+    const excludedCount = attendees.length - considered.length;
+
+    const scored = considered.map(name => {
+      const score = computeScore(name, venue);
+      const t = tierInfo(playerMap[name]);
+      return { ...score, tierText: t.text, tierCls: t.cls };
+    }).sort((a, b) => b.finalScore - a.finalScore);
+
+    renderRanking(scored, venue, excludedCount, attendees.length);
+  });
+
+  function reasonLine(entry, venue){
+    const parts = [];
+    parts.push(`recent ${entry.hasRecent ? Math.round(entry.recent.success) + '%' : '—'}`);
+    parts.push(`overall ${entry.hasOverall ? Math.round(entry.overall.success) + '%' : '—'}`);
+    parts.push(`at ${venue} ${entry.hasVenue ? Math.round(entry.venueStat.success) + '%' : '—'}`);
+    return parts.join(' · ');
+  }
+
+  function rowHtml(entry, index, venue){
+    return `
+      <div class="rank-row">
+        <div class="rank-num">${index + 1}</div>
+        <div class="rank-info">
+          <div class="rank-name">${entry.name}</div>
+          <div class="rank-reason">${reasonLine(entry, venue)}</div>
+        </div>
+        <div class="rank-pct">${Math.round(entry.finalScore)}%</div>
+      </div>
+    `;
+  }
+
+  function renderRanking(scored, venue, excludedCount, totalTicked){
+    rankedSection.classList.remove('hidden');
+
+    rankedList.innerHTML = scored.map((entry, i) => rowHtml(entry, i, venue)).join('');
+
+    const tier1 = scored.filter(e => e.tierText === 'Tier 1');
+    const tier2 = scored.filter(e => e.tierText === 'Tier 2');
+    const tier3 = scored.filter(e => e.tierText === 'Tier 3');
+
+    renderTierGroup(tier1List, tier1Empty, tier1, venue);
+    renderTierGroup(tier2List, tier2Empty, tier2, venue);
+    renderTierGroup(tier3List, tier3Empty, tier3, venue);
+
+    renderSummary(scored, venue, excludedCount, totalTicked, tier1, tier2, tier3);
+  }
+
+  function renderTierGroup(listEl, emptyEl, entries, venue){
+    if(entries.length === 0){
+      listEl.innerHTML = '';
+      emptyEl.classList.remove('hidden');
+      return;
+    }
+    emptyEl.classList.add('hidden');
+    listEl.innerHTML = entries.map((entry, i) => rowHtml(entry, i, venue)).join('');
+  }
+
+  function renderSummary(scored, venue, excludedCount, totalTicked, tier1, tier2, tier3){
+    if(scored.length === 0){
+      summaryText.innerHTML = `<p style="margin:0;">None of the ticked players are eligible — they're all marked <strong>Exclude</strong> in the Team List.</p>`;
+      return;
+    }
+
+    const weightLine = `Each player's score blends <strong>recent form (last 5 results, 30%)</strong>, <strong>overall win rate (30%)</strong>, and <strong>form at ${venue} specifically (40%)</strong> — venue history is weighted highest since that's where tonight's match is happening. Where a player has no history in one of these areas yet, that gap is filled with their overall average so it doesn't unfairly drag them down.`;
+
+    const top = scored[0];
+    const topLine = `<strong>${top.name}</strong> comes out on top at ${Math.round(top.finalScore)}%${top.hasVenue ? `, backed by a strong record at ${venue}` : ', based mainly on their overall and recent form since they have no history at this venue yet'}.`;
+
+    const bottom = scored[scored.length - 1];
+    const bottomLine = scored.length > 1
+      ? `<strong>${bottom.name}</strong> ranks lowest of the group at ${Math.round(bottom.finalScore)}%, the player to watch or consider resting if the team is otherwise strong tonight.`
+      : '';
+
+    const tierLine = `Of the eligible players, <strong>${tier1.length}</strong> are rated Tier 1, <strong>${tier2.length}</strong> Tier 2, and <strong>${tier3.length}</strong> Tier 3 — the three lists above rank each group internally using the same scoring.`;
+
+    const excludeLine = excludedCount > 0
+      ? `${excludedCount} of the ${totalTicked} ticked player${totalTicked === 1 ? '' : 's'} ${excludedCount === 1 ? 'was' : 'were'} left out of the ranking, as they're marked <strong>Exclude</strong> in the Team List.`
+      : '';
+
+    summaryText.innerHTML = `
+      <p style="margin:0 0 8px;">${weightLine}</p>
+      <p style="margin:0 0 8px;">${topLine}</p>
+      ${bottomLine ? `<p style="margin:0 0 8px;">${bottomLine}</p>` : ''}
+      <p style="margin:0${excludeLine ? ' 0 8px' : ''};">${tierLine}</p>
+      ${excludeLine ? `<p style="margin:0;">${excludeLine}</p>` : ''}
+    `;
+  }
+
+  // ---------- Data loading ----------
+  let dataLoaded = false;
+  function loadData(){
+    if(dataLoaded) return;
+    dataLoaded = true;
+
+    db.collection('players').orderBy('name', 'asc').onSnapshot((snapshot) => {
+      allPlayers = snapshot.docs.map(doc => ({
+        id: doc.id,
+        name: doc.data().name,
+        rating: doc.data().rating || 0,
+        tier: doc.data().tier || null
+      }));
+      selectedNames.forEach(name => {
+        if(!allPlayers.some(p => p.name === name)){ selectedNames.delete(name); }
+      });
+      renderPickerCard();
+    });
+
+    db.collection('results').onSnapshot((snapshot) => {
+      allResults = snapshot.docs.map(doc => doc.data());
+    });
+
+    db.collection('venues').orderBy('name', 'asc').onSnapshot((snapshot) => {
+      if(snapshot.empty){
+        venueSelect.innerHTML = '<option value="">No venues yet</option>';
+        return;
+      }
+      const prevValue = venueSelect.value;
+      venueSelect.innerHTML = '<option value="">Select venue…</option>' + snapshot.docs.map(doc =>
+        `<option value="${doc.data().name}">${doc.data().name}</option>`
+      ).join('');
+      if(prevValue){ venueSelect.value = prevValue; }
+    });
+  }
+
+  auth.onAuthStateChanged((user) => {
+    if(user){
+      notAdminView.classList.add('hidden');
+      pageContent.classList.remove('hidden');
+      loadData();
+    } else {
+      pageContent.classList.add('hidden');
+      notAdminView.classList.remove('hidden');
+    }
+  });
+</script>
+</body>
+</html>
