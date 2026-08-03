@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Player Insights - Stapleford Cue Stars Pool Team</title>
+<style>
+  :root{
+    --felt: #0f4d3a;
+    --felt-dark: #0a3a2b;
+    --rail: #4a2c1d;
+    --rail-dark: #331f14;
+    --ivory: #f3ede0;
+    --gold: #c9a227;
+    --line: rgba(243,237,224,0.16);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(255,255,255,0.04), transparent 40%),
+      var(--felt);
+    background-image:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px),
+      var(--felt);
+    font-family: 'Segoe UI', -apple-system, system-ui, sans-serif;
+    color: var(--ivory);
+    padding-bottom: 60px;
+  }
+  .rail{
+    background: linear-gradient(180deg, var(--rail) 0%, var(--rail-dark) 100%);
+    border-bottom: 4.5px solid var(--gold);
+    padding: 24px 15px 20px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+  }
+  .rail-inner{ max-width: 560px; margin: 0 auto; }
+  .back-link{
+    color: var(--gold);
+    font-size: 12px;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+  h1{
+    font-family: 'Oswald', 'Arial Narrow', sans-serif;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: clamp(19px, 4vw, 30px);
+    margin: 4px 0 0;
+    color: var(--ivory);
+    text-shadow: 0 2px 0 rgba(0,0,0,0.3);
+  }
+
+  main{
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 28px 20px 0;
+  }
+
+  .field{ margin-bottom: 20px; }
+  .field label{
+    display:block;
+    color: var(--gold);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .field select{
+    width: 100%;
+    background: var(--ivory);
+    color: #1c1b19;
+    border: 1px solid var(--line);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .field select:focus{ outline:none; border-color: var(--gold); }
+
+  .stats-grid{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .stat-card{
+    background: rgba(0,0,0,0.18);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px 10px;
+    text-align: center;
+  }
+  .stat-card .stat-value{
+    font-family: 'Oswald', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .stat-card .stat-label{
+    margin-top: 8px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: rgba(243,237,224,0.6);
+    font-weight: 700;
+  }
+
+  .empty-state{
+    text-align: center;
+    padding: 40px 24px;
+    color: rgba(243,237,224,0.6);
+  }
+  .empty-state .tri{ font-size: 30px; margin-bottom: 8px; }
+  .empty-state p{ margin: 4px 0; font-size: 13px; }
+
+  .last-played{
+    margin-top: 14px;
+    background: rgba(0,0,0,0.18);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .last-played-days{
+    font-family: 'Oswald', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gold);
+  }
+  .last-played-meta{
+    margin-top: 4px;
+    font-size: 12px;
+    color: rgba(243,237,224,0.6);
+  }
+
+  .form-section{ margin-top: 28px; }
+  .form-section-title{
+    color: var(--gold);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .form-strip{
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .form-dot{
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+    cursor: default;
+  }
+  .form-dot.win{ background: rgba(143,209,158,0.2); color: #8fd19e; border: 1px solid rgba(143,209,158,0.4); }
+  .form-dot.lose{ background: rgba(217,83,79,0.2); color: #ff8a80; border: 1px solid rgba(217,83,79,0.4); }
+  .form-empty{
+    font-size: 12px;
+    color: rgba(243,237,224,0.45);
+  }
+
+  .leg-table-wrap{
+    margin-top: 28px;
+    background: rgba(0,0,0,0.18);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .leg-table-wrap table{ width: 100%; border-collapse: collapse; }
+  .leg-table-wrap thead th{
+    text-align: left;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--gold);
+    font-weight: 700;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+    background: rgba(0,0,0,0.15);
+  }
+  .leg-table-wrap thead th.num{ text-align: center; }
+  .leg-table-wrap tbody td{
+    padding: 9px 12px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--line);
+    color: var(--ivory);
+  }
+  .leg-table-wrap tbody tr:last-child td{ border-bottom: none; }
+  .leg-table-wrap td.num{ text-align: center; }
+  .leg-table-wrap td.leg-name{ font-weight: 600; }
+  .leg-table-wrap td.leg-success{ font-weight: 700; color: var(--gold); }
+  .leg-table-wrap tbody tr.no-data td{ color: rgba(243,237,224,0.35); }
+
+  .hidden{ display:none !important; }
+</style>
+</head>
+<body>
+
+<div class="rail">
+  <div class="rail-inner">
+    <a class="back-link" href="index.html">&larr; Home</a>
+    <h1>Player Insights 💡</h1>
+  </div>
+</div>
+
+<main>
+  <div class="field">
+    <label for="seasonFilter">Season</label>
+    <select id="seasonFilter">
+      <option value="all">All Seasons</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="playerSelect">Player Name</label>
+    <select id="playerSelect">
+      <option value="">Loading players…</option>
+    </select>
+  </div>
+
+  <div class="stats-grid hidden" id="statsGrid">
+    <div class="stat-card">
+      <div class="stat-value" id="gamesPlayedValue">0</div>
+      <div class="stat-label">Games Played</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="gamesWonValue">0</div>
+      <div class="stat-label">Games Won</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="successValue">0%</div>
+      <div class="stat-label">Success</div>
+    </div>
+  </div>
+
+  <div class="last-played hidden" id="lastPlayed">
+    <div class="last-played-days" id="lastPlayedDays"></div>
+    <div class="last-played-meta" id="lastPlayedMeta"></div>
+  </div>
+
+  <div class="empty-state hidden" id="emptyState">
+    <div class="tri">▲</div>
+    <p><strong>No results recorded for this player yet.</strong></p>
+  </div>
+
+  <div class="hidden" id="formSections">
+    <div class="form-section">
+      <div class="form-section-title">Form — Overall (Last 10)</div>
+      <div class="form-strip" id="formOverall"></div>
+    </div>
+
+    <div class="leg-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Leg</th>
+            <th class="num">Played</th>
+            <th class="num">Won</th>
+            <th class="num">Success</th>
+          </tr>
+        </thead>
+        <tbody id="legBreakdownBody"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAiIaXtQRBvDGFllrzmjYbx_Br1mR65Ox8",
+    authDomain: "stapleford-cue-stars.firebaseapp.com",
+    projectId: "stapleford-cue-stars",
+    storageBucket: "stapleford-cue-stars.firebasestorage.app",
+    messagingSenderId: "488893378210",
+    appId: "1:488893378210:web:9f81ed4b389443081031fb"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  const playerSelect = document.getElementById('playerSelect');
+  const seasonFilter = document.getElementById('seasonFilter');
+  const statsGrid = document.getElementById('statsGrid');
+  const emptyState = document.getElementById('emptyState');
+  const gamesPlayedValue = document.getElementById('gamesPlayedValue');
+  const gamesWonValue = document.getElementById('gamesWonValue');
+  const successValue = document.getElementById('successValue');
+  const lastPlayed = document.getElementById('lastPlayed');
+  const lastPlayedDays = document.getElementById('lastPlayedDays');
+  const lastPlayedMeta = document.getElementById('lastPlayedMeta');
+  const formSections = document.getElementById('formSections');
+  const formOverall = document.getElementById('formOverall');
+  const legBreakdownBody = document.getElementById('legBreakdownBody');
+
+  let allResults = [];
+  let resultsLoaded = false;
+
+  function parseDMY(str){
+    const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(str || '');
+    if(!m) return null;
+    return new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]));
+  }
+
+  function renderFormStrip(container, results){
+    const sorted = results.slice().sort((a, b) => {
+      const da = parseDMY(a.matchDate);
+      const db_ = parseDMY(b.matchDate);
+      if(!da && !db_) return 0;
+      if(!da) return 1;
+      if(!db_) return -1;
+      return db_ - da;
+    });
+    const lastTen = sorted.slice(0, 10).reverse();
+    if(lastTen.length === 0){
+      container.innerHTML = '<span class="form-empty">No results yet.</span>';
+      return;
+    }
+    container.innerHTML = lastTen.map(r => {
+      const isWin = r.result === 'Win';
+      const dateLabel = r.matchDate || 'Unknown date';
+      const title = `${dateLabel} · Leg ${r.leg} · ${r.venue || '—'}`;
+      return `<div class="form-dot ${isWin ? 'win' : 'lose'}" title="${title}">${isWin ? 'W' : 'L'}</div>`;
+    }).join('');
+  }
+
+  function renderLegBreakdown(results){
+    const byLeg = {};
+    for(let i = 1; i <= 9; i++){ byLeg[i] = { played: 0, won: 0 }; }
+    results.forEach(r => {
+      const leg = Number(r.leg);
+      if(!byLeg[leg]) return;
+      byLeg[leg].played += 1;
+      if(r.result === 'Win'){ byLeg[leg].won += 1; }
+    });
+    legBreakdownBody.innerHTML = Object.keys(byLeg).map(leg => {
+      const stat = byLeg[leg];
+      const hasData = stat.played > 0;
+      const success = hasData ? Math.round((stat.won / stat.played) * 100) : null;
+      return `
+        <tr class="${hasData ? '' : 'no-data'}">
+          <td class="leg-name">Leg ${leg}</td>
+          <td class="num">${stat.played}</td>
+          <td class="num">${stat.won}</td>
+          <td class="num leg-success">${hasData ? success + '%' : '—'}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function renderStatsForSelectedPlayer(){
+    const name = playerSelect.value;
+    if(!name){
+      statsGrid.classList.add('hidden');
+      emptyState.classList.add('hidden');
+      formSections.classList.add('hidden');
+      lastPlayed.classList.add('hidden');
+      return;
+    }
+    const playerResults = allResults.filter(r => {
+      if(r.playerName !== name) return false;
+      if(seasonFilter.value !== 'all' && r.season !== seasonFilter.value) return false;
+      return true;
+    });
+    const played = playerResults.length;
+    const won = playerResults.filter(r => r.result === 'Win').length;
+    const success = played > 0 ? Math.round((won / played) * 100) : 0;
+
+    if(played === 0){
+      statsGrid.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+      formSections.classList.add('hidden');
+      lastPlayed.classList.add('hidden');
+      return;
+    }
+    emptyState.classList.add('hidden');
+    statsGrid.classList.remove('hidden');
+    gamesPlayedValue.textContent = played;
+    gamesWonValue.textContent = won;
+    successValue.textContent = success + '%';
+
+    const dated = playerResults
+      .map(r => ({ r, d: parseDMY(r.matchDate) }))
+      .filter(x => x.d);
+    if(dated.length > 0){
+      dated.sort((a, b) => b.d - a.d);
+      const latest = dated[0];
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const diffDays = Math.round((today - latest.d) / 86400000);
+      lastPlayed.classList.remove('hidden');
+      lastPlayedDays.textContent = diffDays === 0 ? 'Last Played today'
+        : diffDays === 1 ? 'Last Played 1 day ago'
+        : `Last Played ${diffDays} days ago`;
+      lastPlayedMeta.textContent = `${latest.r.homeTeam || '—'} vs ${latest.r.awayTeam || '—'}`;
+    } else {
+      lastPlayed.classList.add('hidden');
+    }
+
+    formSections.classList.remove('hidden');
+    renderFormStrip(formOverall, playerResults);
+    renderLegBreakdown(playerResults);
+  }
+
+  db.collection('players').orderBy('name', 'asc').onSnapshot((snapshot) => {
+    if(snapshot.empty){
+      playerSelect.innerHTML = '<option value="">No players in Team List yet</option>';
+      statsGrid.classList.add('hidden');
+      emptyState.classList.add('hidden');
+      formSections.classList.add('hidden');
+      return;
+    }
+    const previousValue = playerSelect.value;
+    playerSelect.innerHTML = '<option value="">Select a player…</option>' + snapshot.docs.map(doc =>
+      `<option value="${doc.data().name}">${doc.data().name}</option>`
+    ).join('');
+    if(previousValue){ playerSelect.value = previousValue; }
+    renderStatsForSelectedPlayer();
+  });
+
+  db.collection('results').onSnapshot((snapshot) => {
+    allResults = snapshot.docs.map(doc => doc.data());
+    resultsLoaded = true;
+    renderStatsForSelectedPlayer();
+  });
+
+  db.collection('seasons').orderBy('name', 'asc').onSnapshot((snapshot) => {
+    const prevValue = seasonFilter.value;
+    seasonFilter.innerHTML = '<option value="all">All Seasons</option>' + snapshot.docs.map(doc =>
+      `<option value="${doc.data().name}">${doc.data().name}</option>`
+    ).join('');
+    if(prevValue){ seasonFilter.value = prevValue; }
+    renderStatsForSelectedPlayer();
+  });
+
+  playerSelect.addEventListener('change', renderStatsForSelectedPlayer);
+  seasonFilter.addEventListener('change', renderStatsForSelectedPlayer);
+</script>
+</body>
+</html>
