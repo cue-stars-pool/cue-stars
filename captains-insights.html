@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Captain's Insights - Stapleford Cue Stars Pool Team</title>
+<style>
+  :root{
+    --felt: #0f4d3a;
+    --felt-dark: #0a3a2b;
+    --rail: #4a2c1d;
+    --rail-dark: #331f14;
+    --ivory: #f3ede0;
+    --gold: #c9a227;
+    --line: rgba(243,237,224,0.16);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(255,255,255,0.04), transparent 40%),
+      var(--felt);
+    background-image:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px),
+      var(--felt);
+    font-family: 'Segoe UI', -apple-system, system-ui, sans-serif;
+    color: var(--ivory);
+    padding-bottom: 60px;
+  }
+  .rail{
+    background: linear-gradient(180deg, var(--rail) 0%, var(--rail-dark) 100%);
+    border-bottom: 4.5px solid var(--gold);
+    padding: 24px 15px 20px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+  }
+  .rail-inner{ max-width: 640px; margin: 0 auto; }
+  .back-link{
+    color: var(--gold);
+    font-size: 12px;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+  h1{
+    font-family: 'Oswald', 'Arial Narrow', sans-serif;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: clamp(19px, 4vw, 30px);
+    margin: 4px 0 0;
+    color: var(--ivory);
+    text-shadow: 0 2px 0 rgba(0,0,0,0.3);
+  }
+
+  main{
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 24px 15px 0;
+  }
+
+  .section-title{
+    color: var(--gold);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 12px;
+  }
+  .section{ margin-bottom: 30px; }
+
+  .field{ margin-bottom: 16px; }
+  .field label{
+    display:block;
+    color: var(--gold);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .field select{
+    width: 100%;
+    background: var(--ivory);
+    color: #1c1b19;
+    border: 1px solid var(--line);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .field select:focus{ outline:none; border-color: var(--gold); }
+  .field select option{ color: #1c1b19; }
+
+  .attendance-card{
+    background: rgba(0,0,0,0.18);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .attendance-row{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+  }
+  .attendance-row:last-child{ border-bottom: none; }
+  .attendance-row input[type="checkbox"]{
+    width: 19px; height: 19px; flex-shrink: 0;
+    accent-color: var(--gold); cursor: pointer;
+  }
+  .attendance-row label{
+    flex: 1; cursor: pointer; font-weight: 600; color: var(--ivory);
+  }
+
+  .attendance-count{
+    font-size: 11px;
+    color: rgba(243,237,224,0.55);
+    margin: 10px 0 0;
+  }
+
+  .generate-btn{
+    width: 100%;
+    background: var(--gold);
+    color: var(--rail-dark);
+    border: none;
+    padding: 13px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 14px;
+  }
+  .generate-btn:hover{ filter: brightness(1.08); }
+
+  .tool-btn-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 30px;
+  }
+  .tool-btn{
+    background: var(--gold);
+    color: var(--rail-dark);
+    border: 1.5px solid var(--gold);
+    border-radius: 10px;
+    padding: 18px 10px;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .tool-btn:hover,
+  .tool-btn:active{
+    background: transparent;
+    color: var(--gold);
+  }
+
+  .generate-msg{
+    font-size: 12px;
+    margin-top: 10px;
+    min-height: 16px;
+    text-align: center;
+    color: #ff8a80;
+  }
+
+  .lineup-list{ display: flex; flex-direction: column; gap: 8px; }
+  .lineup-row{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(0,0,0,0.18);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 11px 14px;
+  }
+  .lineup-row.backup{ border-color: rgba(201,162,39,0.4); background: rgba(201,162,39,0.08); }
+  .lineup-leg-num{
+    font-family: 'Oswald', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gold);
+    width: 34px;
+    flex-shrink: 0;
+    text-align: center;
+  }
+  .lineup-info{ flex: 1; min-width: 0; }
+  .lineup-name{ font-size: 14px; font-weight: 700; color: var(--ivory); }
+  .lineup-reason{ font-size: 11.5px; color: rgba(243,237,224,0.55); margin-top: 2px; }
+  .lineup-pct{
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #8fd19e;
+    flex-shrink: 0;
+  }
+
+  .lineup-summary{
+    margin-top: 16px;
+    background: rgba(0,0,0,0.15);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(243,237,224,0.8);
+  }
+  .lineup-summary strong{ color: var(--ivory); }
+  .lineup-summary-title{
+    color: var(--gold);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  .pick-list{ display: flex; flex-direction: column; gap: 8px; }
+  .pick-row{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: rgba(0,0,0,0.18);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .pick-row .pick-name{ font-size: 14px; font-weight: 600; color: var(--ivory); }
+  .pick-row .pick-reason{ font-size: 11.5px; color: rgba(243,237,224,0.55); margin-top: 2px; }
+  .pick-badge{
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    letter-spacing: 0.3px;
+  }
+  .pick-badge.hot{ background: rgba(201,162,39,0.2); color: var(--gold); }
+  .pick-badge.cold{ background: rgba(76,111,165,0.25); color: #8fb4e8; }
+
+  .empty-note{ font-size: 12px; color: rgba(243,237,224,0.45); padding: 4px 0; }
+
+  .not-admin{ text-align: center; padding: 50px 24px; color: rgba(243,237,224,0.6); }
+  .not-admin h2{
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--ivory);
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+
+  .hidden{ display:none !important; }
+</style>
+</head>
+<body>
+
+<div class="rail">
+  <div class="rail-inner">
+    <a class="back-link" href="index.html">&larr; Home</a>
+    <h1>Captain's Insights</h1>
+  </div>
+</div>
+
+<div class="not-admin hidden" id="notAdminView">
+  <div style="max-width:640px; margin:0 auto; padding:0 15px;">
+    <h2>Admins Only</h2>
+    <p>You need to be signed in as admin to view Captain's Insights.</p>
+    <p><a class="back-link" href="index.html">&larr; Back to Home</a></p>
+  </div>
+</div>
+
+<div class="hidden" id="pageContent">
+<main>
+
+  <div class="tool-btn-grid">
+    <button type="button" class="tool-btn" id="lineupPredictorBtn">Line Up Predictor</button>
+    <button type="button" class="tool-btn" id="legSelectorBtn">Leg Selector</button>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Venue</div>
+    <div class="field">
+      <label for="venueSelect">Playing at</label>
+      <select id="venueSelect">
+        <option value="">Loading venues…</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Who's In Tonight?</div>
+    <div class="attendance-card" id="attendanceCard"></div>
+    <div class="attendance-count" id="attendanceCount">0 players ticked</div>
+    <button type="button" class="generate-btn" id="generateBtn">Generate Best Pick</button>
+    <button type="button" class="generate-btn" id="resetFormBtn" style="margin-top:8px;">Reset Form</button>
+    <div class="generate-msg" id="generateMsg"></div>
+  </div>
+
+  <div class="section hidden" id="lineupSection">
+    <div class="section-title">Suggested Lineup</div>
+    <div class="lineup-list" id="lineupList"></div>
+    <div class="lineup-summary" id="lineupSummary">
+      <div class="lineup-summary-title">Why These Picks?</div>
+      <div id="lineupSummaryText"></div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAiIaXtQRBvDGFllrzmjYbx_Br1mR65Ox8",
+    authDomain: "stapleford-cue-stars.firebaseapp.com",
+    projectId: "stapleford-cue-stars",
+    storageBucket: "stapleford-cue-stars.firebasestorage.app",
+    messagingSenderId: "488893378210",
+    appId: "1:488893378210:web:9f81ed4b389443081031fb"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  const notAdminView = document.getElementById('notAdminView');
+  const pageContent = document.getElementById('pageContent');
+
+  const venueSelect = document.getElementById('venueSelect');
+  const attendanceCard = document.getElementById('attendanceCard');
+  const attendanceCount = document.getElementById('attendanceCount');
+  const generateBtn = document.getElementById('generateBtn');
+  const resetFormBtn = document.getElementById('resetFormBtn');
+  const generateMsg = document.getElementById('generateMsg');
+  const lineupSection = document.getElementById('lineupSection');
+  const lineupList = document.getElementById('lineupList');
+  const lineupSummaryText = document.getElementById('lineupSummaryText');
+
+  let allResults = [];
+  let activePlayerNames = [];
+  let attendingNames = new Set();
+
+  function parseDMY(str){
+    const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(str || '');
+    if(!m) return null;
+    return new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]));
+  }
+
+  function sortedResultsForPlayer(name){
+    return allResults
+      .filter(r => r.playerName === name)
+      .map(r => ({ r, d: parseDMY(r.matchDate) }))
+      .sort((a, b) => {
+        if(!a.d && !b.d) return 0;
+        if(!a.d) return 1;
+        if(!b.d) return -1;
+        return b.d - a.d;
+      })
+      .map(x => x.r);
+  }
+
+  // ---------- Attendance picker ----------
+  function renderAttendanceCard(){
+    if(activePlayerNames.length === 0){
+      attendanceCard.innerHTML = '<div style="padding:16px; font-size:13px; color:rgba(243,237,224,0.5);">No players in Team List yet.</div>';
+      return;
+    }
+    attendanceCard.innerHTML = activePlayerNames.map((name, i) => `
+      <div class="attendance-row">
+        <input type="checkbox" id="att-${i}" data-name="${name}" ${attendingNames.has(name) ? 'checked' : ''}>
+        <label for="att-${i}">${name}</label>
+      </div>
+    `).join('');
+    updateAttendanceCount();
+  }
+
+  function updateAttendanceCount(){
+    attendanceCount.textContent = `${attendingNames.size} player${attendingNames.size === 1 ? '' : 's'} ticked`;
+  }
+
+  attendanceCard.addEventListener('change', (e) => {
+    if(e.target.matches('input[type="checkbox"]')){
+      const name = e.target.dataset.name;
+      if(e.target.checked){ attendingNames.add(name); } else { attendingNames.delete(name); }
+      updateAttendanceCount();
+    }
+  });
+
+  // ---------- Best-pick generator ----------
+  function statsFor(results){
+    const played = results.length;
+    const won = results.filter(r => r.result === 'Win').length;
+    const success = played > 0 ? (won / played) * 100 : 50; // neutral default with no data
+    return { played, won, success };
+  }
+
+  function recentFormRate(name){
+    const sorted = sortedResultsForPlayer(name);
+    const lastFive = sorted.slice(0, 5);
+    if(lastFive.length === 0) return null;
+    const won = lastFive.filter(r => r.result === 'Win').length;
+    return (won / lastFive.length) * 100;
+  }
+
+  function scoreForLeg(name, leg, venue){
+    const playerResults = allResults.filter(r => r.playerName === name);
+    const venueLegResults = venue
+      ? playerResults.filter(r => Number(r.leg) === leg && (r.homeTeam === venue || r.awayTeam === venue))
+      : [];
+    const legResults = playerResults.filter(r => Number(r.leg) === leg);
+
+    let basis, note;
+    if(venue && venueLegResults.length >= 2){
+      basis = venueLegResults;
+      note = `Leg ${leg} at ${venue}`;
+    } else if(legResults.length >= 1){
+      basis = legResults;
+      note = `Leg ${leg} overall`;
+    } else {
+      basis = playerResults;
+      note = playerResults.length > 0 ? 'overall form' : 'no results yet';
+    }
+    const stat = statsFor(basis);
+
+    const form = recentFormRate(name);
+    let finalScore = stat.success;
+    let formApplied = false;
+    if(form !== null){
+      finalScore = (stat.success * 0.7) + (form * 0.3);
+      formApplied = true;
+    }
+
+    return { name, leg, stat, note, form, formApplied, finalScore };
+  }
+
+  resetFormBtn.addEventListener('click', () => {
+    venueSelect.value = '';
+    attendingNames.clear();
+    renderAttendanceCard();
+    lineupSection.classList.add('hidden');
+    lineupList.innerHTML = '';
+    lineupSummaryText.innerHTML = '';
+    generateMsg.textContent = '';
+  });
+
+  generateBtn.addEventListener('click', () => {
+    generateMsg.textContent = '';
+    const venue = venueSelect.value;
+    const attendees = Array.from(attendingNames);
+
+    if(!venue){
+      generateMsg.textContent = 'Please select a venue first.';
+      return;
+    }
+    if(attendees.length < 7){
+      generateMsg.textContent = `Tick at least 7 players (currently ${attendees.length}) to generate a full lineup for legs 1–7.`;
+      return;
+    }
+
+    // Assign legs 1-7 greedily: for each leg, pick the best-scoring unused player
+    const remaining = new Set(attendees);
+    const assignments = [];
+
+    for(let leg = 1; leg <= 7; leg++){
+      let best = null;
+      remaining.forEach(name => {
+        const candidate = scoreForLeg(name, leg, venue);
+        if(!best || candidate.finalScore > best.finalScore ||
+           (candidate.finalScore === best.finalScore && candidate.stat.played > best.stat.played)){
+          best = candidate;
+        }
+      });
+      assignments.push(best);
+      remaining.delete(best.name);
+    }
+
+    // Legs 8-9: the two lowest-scoring players from legs 1-7 get a backup slot
+    const byScoreAsc = assignments.slice().sort((a, b) => a.finalScore - b.finalScore);
+    const backups = byScoreAsc.slice(0, 2).map((entry, i) => ({
+      name: entry.name,
+      leg: 8 + i,
+      stat: entry.stat,
+      finalScore: entry.finalScore,
+      note: `backup for their Leg ${entry.leg} match`,
+      fromLeg: entry.leg
+    }));
+
+    renderLineup(assignments, backups, venue);
+  });
+
+  function renderLineup(assignments, backups, venue){
+    lineupSection.classList.remove('hidden');
+    const mainRows = assignments.map(a => {
+      const formNote = a.formApplied ? ` · recent form ${Math.round(a.form)}%` : '';
+      return `
+      <div class="lineup-row">
+        <div class="lineup-leg-num">${a.leg}</div>
+        <div class="lineup-info">
+          <div class="lineup-name">${a.name}</div>
+          <div class="lineup-reason">${a.stat.played} played · ${a.note}${formNote}</div>
+        </div>
+        <div class="lineup-pct">${Math.round(a.finalScore)}%</div>
+      </div>
+    `;
+    }).join('');
+    const backupRows = backups.map(b => `
+      <div class="lineup-row backup">
+        <div class="lineup-leg-num">${b.leg}</div>
+        <div class="lineup-info">
+          <div class="lineup-name">${b.name}</div>
+          <div class="lineup-reason">${b.note}</div>
+        </div>
+        <div class="lineup-pct">${Math.round(b.finalScore)}%</div>
+      </div>
+    `).join('');
+    lineupList.innerHTML = mainRows + backupRows;
+
+    renderLineupSummary(assignments, backups, venue);
+  }
+
+  function renderLineupSummary(assignments, backups, venue){
+    const venueTierCount = assignments.filter(a => a.note.includes('at ' + venue)).length;
+    const legTierCount = assignments.filter(a => a.note.endsWith('overall') && !a.note.includes('at ' + venue)).length;
+    const fallbackCount = assignments.length - venueTierCount - legTierCount;
+
+    const strongest = assignments.slice().sort((a, b) => b.finalScore - a.finalScore)[0];
+    const weakestTwo = assignments.slice().sort((a, b) => a.finalScore - b.finalScore).slice(0, 2);
+
+    const formBoostedCount = assignments.filter(a => a.formApplied).length;
+
+    let dataLine;
+    if(venueTierCount === assignments.length){
+      dataLine = `All 7 picks are backed by solid history at <strong>${venue}</strong> on their specific leg.`;
+    } else {
+      const parts = [];
+      if(venueTierCount > 0) parts.push(`${venueTierCount} pick${venueTierCount === 1 ? '' : 's'} from strong form at <strong>${venue}</strong> on that exact leg`);
+      if(legTierCount > 0) parts.push(`${legTierCount} from their record on that leg regardless of venue (not enough games at ${venue} yet)`);
+      if(fallbackCount > 0) parts.push(`${fallbackCount} from overall form (little or no history on that specific leg)`);
+      dataLine = `Picks are built from a mix of data: ${parts.join(', ')}.`;
+    }
+
+    const formLine = formBoostedCount > 0
+      ? `Recent form (last 5 results) was factored in for ${formBoostedCount} of the 7 starters, nudging the ranking toward players currently in good touch.`
+      : `No recent-form data was available to factor in yet.`;
+
+    const strongLine = `<strong>${strongest.name}</strong> is the strongest pick on paper, projected around ${Math.round(strongest.finalScore)}% for Leg ${strongest.leg}.`;
+
+    const backupLine = `<strong>${weakestTwo[0].name}</strong> and <strong>${weakestTwo[1].name}</strong> carry the lowest projected win rates among the seven starters, so they've been given the backup slots in Legs 8 and 9 — a second chance if their first match doesn't go their way.`;
+
+    lineupSummaryText.innerHTML = `
+      <p style="margin:0 0 8px;">${dataLine}</p>
+      <p style="margin:0 0 8px;">${formLine}</p>
+      <p style="margin:0 0 8px;">${strongLine}</p>
+      <p style="margin:0;">${backupLine}</p>
+    `;
+  }
+
+  // ---------- Data loading ----------
+  let dataLoaded = false;
+  function loadData(){
+    if(dataLoaded) return;
+    dataLoaded = true;
+
+    db.collection('players').orderBy('name', 'asc').onSnapshot((snapshot) => {
+      activePlayerNames = snapshot.docs.map(doc => doc.data().name);
+      attendingNames.forEach(name => {
+        if(!activePlayerNames.includes(name)){ attendingNames.delete(name); }
+      });
+      renderAttendanceCard();
+    });
+
+    db.collection('results').onSnapshot((snapshot) => {
+      allResults = snapshot.docs.map(doc => doc.data());
+    });
+
+    db.collection('venues').orderBy('name', 'asc').onSnapshot((snapshot) => {
+      if(snapshot.empty){
+        venueSelect.innerHTML = '<option value="">No venues yet</option>';
+        return;
+      }
+      const prevValue = venueSelect.value;
+      venueSelect.innerHTML = '<option value="">Select venue…</option>' + snapshot.docs.map(doc =>
+        `<option value="${doc.data().name}">${doc.data().name}</option>`
+      ).join('');
+      if(prevValue){ venueSelect.value = prevValue; }
+    });
+  }
+
+  auth.onAuthStateChanged((user) => {
+    if(user){
+      notAdminView.classList.add('hidden');
+      pageContent.classList.remove('hidden');
+      loadData();
+    } else {
+      pageContent.classList.add('hidden');
+      notAdminView.classList.remove('hidden');
+    }
+  });
+</script>
+</body>
+</html>
